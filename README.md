@@ -7,4 +7,8 @@ The current site domain is currently hosted here: https://cphysplus.github.io
 Developed by:
 Wladimir E. Banda-Barragán @Yachay Tech University
 
+Web template from:
+https://github.com/learning-zone/website-templates
 
+Images taken from: 
+https://pixabay.com
