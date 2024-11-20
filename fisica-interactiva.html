@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ejemplos de Enseñanza</title>
+  <title>Física Interactiva</title>
   <!-- Enlace CSS y MathJax -->
   <link rel="stylesheet" href="css/styles.css">
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
@@ -11,25 +11,24 @@
 </head>
 <body>
   <header>
-    <h1>Recursos Didácticos en Física</h1>
-    <p>Explora conceptos fundamentales de la física con ejemplos, ecuaciones y simulaciones interactivas.</p>
+    <h1>Física Interactiva </h1>
+    <p>Aquí incluimos algunos ejemplos didácticos sobre física. Los notebooks de Python te permiten ejecutar y/o modificar el código a tu gusto. Las páginas interactivas te permiten visualizar los efectos que tienen los parámetros de cada problema.</p>
   </header>
 
   <main>
-    <!-- Sección 1: Movimiento Parabólico -->
+    <!-- Movimiento Parabólico -->
     <section id="movimiento-parabolico">
       <h2>1. Movimiento Parabólico</h2>
-      <p>Comprende la física de la trayectoria de un proyectil bajo la influencia de la gravedad.</p>
+      <p>El movimiento parabólico estudia la trayectoria de un objeto bajo la influencia de la gravedad.</p>
       <div class="plot">
         <img src="plots/movimiento-parabolico.png" alt="Gráfico del Movimiento Parabólico">
       </div>
       <div class="equations">
-        <p>Ecuaciones:</p>
+        <p>Ecuaciones del Movimiento parabólico:</p>
         <p>Desplazamiento en \(x\): \(x(t) = v_0 \cos(\theta) t\)</p>
         <p>Desplazamiento en \(y\): \(y(t) = v_0 \sin(\theta) t - \frac{1}{2} g t^2\)</p>
-        <p>Alcance: \(R = \frac{v_0^2 \sin(2\theta)}{g}\)</p>
       </div>
-      <a href="movimiento-parabolico.html">Explorar Ejemplo Interactivo</a>
+      <a href="fisica-interactiva/movimiento-parabolico.html">Explorar Ejemplo Interactivo</a>
     </section>
 
     <!-- Sección 2: Oscilador Armónico -->
@@ -44,37 +43,9 @@
         <p>Posición: \(x(t) = A \cos(\omega t + \phi)\)</p>
         <p>Frecuencia angular: \(\omega = \sqrt{\frac{k}{m}}\)</p>
       </div>
-      <a href="oscilador-armonico.html">Explorar Ejemplo Interactivo</a>
+      <a href="fisica-interactiva/oscilador-armonico.html">Explorar Ejemplo Interactivo</a>
     </section>
 
-    <!-- Sección 3: Campo Eléctrico -->
-    <section id="campo-electrico">
-      <h2>3. Campo Eléctrico de una Carga Puntual</h2>
-      <p>Aprende cómo se generan los campos eléctricos por cargas puntuales.</p>
-      <div class="plot">
-        <img src="plots/campo-electrico.png" alt="Gráfico del Campo Eléctrico">
-      </div>
-      <div class="equations">
-        <p>Ecuaciones:</p>
-        <p>Campo Eléctrico: \(\vec{E} = \frac{k_e q}{r^2} \hat{r}\)</p>
-      </div>
-      <a href="campo-electrico.html">Explorar Ejemplo Interactivo</a>
-    </section>
-
-    <!-- Sección 4: Interferencia de Ondas -->
-    <section id="interferencia-ondas">
-      <h2>4. Interferencia de Ondas</h2>
-      <p>Explora el fenómeno de interferencia constructiva y destructiva de ondas.</p>
-      <div class="plot">
-        <img src="plots/interferencia-ondas.png" alt="Gráfico de la Interferencia de Ondas">
-      </div>
-      <div class="equations">
-        <p>Ecuaciones:</p>
-        <p>Onda Resultante: \(y(t) = y_1(t) + y_2(t)\)</p>
-        <p>Ecuación de la Onda: \(y(t) = A \cos(kx - \omega t)\)</p>
-      </div>
-      <a href="interferencia-ondas.html">Explorar Ejemplo Interactivo</a>
-    </section>
   </main>
 
   <footer>
