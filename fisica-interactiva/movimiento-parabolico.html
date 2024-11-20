@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,7 +19,7 @@
     </style>
 </head>
 <body>
-    <h1>Projectile Motion</h1>
+    <h1>Movimiento Parabólico</h1>
     <div id="slider-container">
         <label for="theta-slider">Set Launch Angle (θ):</label>
         <input type="range" id="theta-slider" min="0" max="90" step="1" value="30" oninput="updatePlot()">
@@ -28,27 +28,27 @@
     <div id="plot"></div>
 
     <script>
-        // Constants
+        // Constantes
         const x0 = 0, y0 = 0;
-        const v0 = 10.0; // Initial velocity (m/s)
-        const g = 9.8;  // Gravitational acceleration (m/s^2)
+        const v0 = 10.0; // Velocidad inicial (m/s)
+        const g = 9.8;  // Aceleración gravitatoria (m/s^2)
 
-        // Compute maximum ranges
+        // Rangos máximos
         const maxTheta = Math.PI / 2; // Max angle in radians
         const maxTime = (2 * v0 * Math.sin(maxTheta)) / g;
-        const maxX = v0 * Math.cos(maxTheta) * maxTime; // Max horizontal range
-        const maxY = Math.pow(v0 * Math.sin(maxTheta), 2) / (2 * g); // Max vertical height
+        const maxX = v0 * Math.cos(maxTheta) * maxTime; // Alcance
+        const maxY = Math.pow(v0 * Math.sin(maxTheta), 2) / (2 * g); // Altura máxima
 
-        // Function to compute trajectory
+        // Mov. Parabólico
         function trajectory(thetaDeg) {
-            const theta = thetaDeg * Math.PI / 180; // Convert degrees to radians
+            const theta = thetaDeg * Math.PI / 180; // Deg -> Rad
             const t = Array.from({length: 1000}, (_, i) => (i / 999) * (2 * v0 * Math.sin(theta) / g));
             const x = t.map(ti => x0 + v0 * Math.cos(theta) * ti);
             const y = t.map(ti => y0 + v0 * Math.sin(theta) * ti - 0.5 * g * Math.pow(ti, 2));
             return { x, y };
         }
 
-        // Initialize the plot
+        // Plot
         function initializePlot() {
             const initialTheta = 30;
             const { x, y } = trajectory(initialTheta);
@@ -62,7 +62,7 @@
             };
 
             const layout = {
-                title: 'Projectile Motion',
+                title: 'Movimiemto Parabólico',
                 xaxis: { title: 'x [m]', range: [-1, maxX + 11] },
                 yaxis: { title: 'y [m]', range: [-1, maxY + 1] },
                 template: 'plotly_white'
@@ -71,7 +71,7 @@
             Plotly.newPlot('plot', [trace], layout);
         }
 
-        // Update the plot
+        // Actualizar interactivamente
         function updatePlot() {
             const slider = document.getElementById('theta-slider');
             const thetaDeg = parseInt(slider.value, 10);
