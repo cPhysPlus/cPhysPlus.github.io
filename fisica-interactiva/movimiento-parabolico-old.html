@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projectile Motion</title>
+    <script src="https://cdn.plot.ly/plotly-2.20.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #slider-container {
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Movimiento Parabólico</h1>
+    <div id="slider-container">
+        <label for="theta-slider">Set Launch Angle (θ):</label>
+        <input type="range" id="theta-slider" min="0" max="90" step="1" value="30" oninput="updatePlot()">
+        <span id="theta-value">30°</span>
+    </div>
+    <div id="plot"></div>
+
+    <script>
+        // Constantes
+        const x0 = 0, y0 = 0;
+        const v0 = 10.0; // Velocidad inicial (m/s)
+        const g = 9.8;  // Aceleración gravitatoria (m/s^2)
+
+        // Rangos máximos
+        const maxTheta = Math.PI / 2; // Max angle in radians
+        const maxTime = (2 * v0 * Math.sin(maxTheta)) / g;
+        const maxX = v0 * Math.cos(maxTheta) * maxTime; // Alcance
+        const maxY = Math.pow(v0 * Math.sin(maxTheta), 2) / (2 * g); // Altura máxima
+
+        // Mov. Parabólico
+        function trajectory(thetaDeg) {
+            const theta = thetaDeg * Math.PI / 180; // Deg -> Rad
+            const t = Array.from({length: 1000}, (_, i) => (i / 999) * (2 * v0 * Math.sin(theta) / g));
+            const x = t.map(ti => x0 + v0 * Math.cos(theta) * ti);
+            const y = t.map(ti => y0 + v0 * Math.sin(theta) * ti - 0.5 * g * Math.pow(ti, 2));
+            return { x, y };
+        }
+
+        // Plot
+        function initializePlot() {
+            const initialTheta = 30;
+            const { x, y } = trajectory(initialTheta);
+
+            const trace = {
+                x: x,
+                y: y,
+                mode: 'lines',
+                line: { color: 'magenta' },
+                name: `θ = ${initialTheta}°`
+            };
+
+            const layout = {
+                title: 'Movimiemto Parabólico',
+                xaxis: { title: 'x [m]', range: [-1, maxX + 11] },
+                yaxis: { title: 'y [m]', range: [-1, maxY + 1] },
+                template: 'plotly_white'
+            };
+
+            Plotly.newPlot('plot', [trace], layout);
+        }
+
+        // Actualizar interactivamente
+        function updatePlot() {
+            const slider = document.getElementById('theta-slider');
+            const thetaDeg = parseInt(slider.value, 10);
+            document.getElementById('theta-value').innerText = `${thetaDeg}°`;
+
+            const { x, y } = trajectory(thetaDeg);
+
+            const update = {
+                x: [x],
+                y: [y],
+                name: `θ = ${thetaDeg}°`
+            };
+
+            Plotly.update('plot', update);
+        }
+
+        // Initialize everything
+        initializePlot();
+    </script>
+</body>
+</html>
+
