@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <title>Cosmological Lines and Redshift</title>
+</head>
+<body>
+    <h1>Interactive Cosmological Line Viewer</h1>
+    <label for="zSlider">Redshift (z): </label>
+    <input type="range" id="zSlider" min="0" max="10" step="0.1" value="0" oninput="updatePlot()">
+    <span id="zValue">0</span>
+    <br>
+    <label>
+        <input type="checkbox" id="showLyman" checked onchange="updatePlot()"> Show Lyman-alpha (λ₀ = 1216 Å)
+    </label>
+    <br>
+    <label>
+        <input type="checkbox" id="showHAlpha" onchange="updatePlot()"> Show H-alpha (λ₀ = 6563 Å)
+    </label>
+    <div id="plot"></div>
+
+    <script>
+        // Cosmological parameters
+        const H0 = 70.0; // Hubble constant in km/s/Mpc
+        const Omega_m = 0.27; // Matter density parameter
+        const Omega_Lambda = 0.73; // Dark energy density parameter
+
+        // Constants for conversion
+        const H0_in_s = H0 * 3.24078e-20; // Convert H0 from km/s/Mpc to 1/s
+        const s_to_Gyr = 3.16888e-17; // Seconds to Gyr
+
+        // Hubble parameter H(z)
+        function H_z(z) {
+            return H0 * Math.sqrt(Omega_m * Math.pow(1 + z, 3) + Omega_Lambda);
+        }
+
+        // Age of the Universe integrand
+        function integrand(z) {
+            return 1 / ((1 + z) * H_z(z));
+        }
+
+        // Numerical integration using a simple trapezoidal method
+        function integrate(func, zStart, zEnd, steps = 1000) {
+            const dz = (zEnd - zStart) / steps;
+            let sum = 0;
+            for (let i = 0; i < steps; i++) {
+                const z1 = zStart + i * dz;
+                const z2 = z1 + dz;
+                sum += 0.5 * (func(z1) + func(z2)) * dz;
+            }
+            return sum;
+        }
+
+        // Age of the Universe at redshift z
+        function age_of_universe(z) {
+            const age = integrate(integrand, z, 1000); // Approximate infinity
+            return age * s_to_Gyr; // Convert seconds to Gyr
+        }
+
+        // Gaussian line profile
+        function gaussian(x, mu, sigma) {
+            return (1 / (sigma * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2));
+        }
+
+        // Update the plot
+        function updatePlot() {
+            const z = parseFloat(document.getElementById("zSlider").value);
+            const showLyman = document.getElementById("showLyman").checked;
+            const showHAlpha = document.getElementById("showHAlpha").checked;
+            document.getElementById("zValue").innerText = z;
+
+            const lambda = Array.from({ length: 1000 }, (_, i) => i * 16); // Wavelength range
+            const sigma = 50;
+            const visibleMin = 4000;
+            const visibleMax = 7000;
+
+            const data = [];
+
+            // Visible spectrum shading
+            data.push({
+                x: [visibleMin, visibleMax, visibleMax, visibleMin],
+                y: [0, 0, 1, 1],
+                type: 'scatter',
+                fill: 'toself',
+                fillcolor: 'rgba(255,192,203,0.5)',
+                line: { width: 0 },
+                hoverinfo: 'skip',
+                name: 'Visible Spectrum'
+            });
+
+            // Lyman-alpha line
+            if (showLyman) {
+                const lambdaLyman = 1216;
+                const restLyman = lambda.map(l => gaussian(l, lambdaLyman, sigma));
+                const shiftedLyman = lambda.map(l => gaussian(l, lambdaLyman * (1 + z), sigma));
+
+                data.push({
+                    x: lambda,
+                    y: restLyman,
+                    type: 'scatter',
+                    mode: 'lines',
+                    line: { color: 'red' },
+                    name: `Lyman-alpha (z=0)`
+                });
+
+                data.push({
+                    x: lambda,
+                    y: shiftedLyman,
+                    type: 'scatter',
+                    mode: 'lines',
+                    line: { color: 'blue' },
+                    name: `Lyman-alpha (z=${z})`
+                });
+            }
+
+            // H-alpha line
+            if (showHAlpha) {
+                const lambdaHAlpha = 6563;
+                const restHAlpha = lambda.map(l => gaussian(l, lambdaHAlpha, sigma));
+                const shiftedHAlpha = lambda.map(l => gaussian(l, lambdaHAlpha * (1 + z), sigma));
+
+                data.push({
+                    x: lambda,
+                    y: restHAlpha,
+                    type: 'scatter',
+                    mode: 'lines',
+                    line: { color: 'brown' },
+                    name: `H-alpha (z=0)`
+                });
+
+                data.push({
+                    x: lambda,
+                    y: shiftedHAlpha,
+                    type: 'scatter',
+                    mode: 'lines',
+                    line: { color: 'darkblue' },
+                    name: `H-alpha (z=${z})`
+                });
+            }
+
+            // Layout
+            const layout = {
+                title: `H(z): ${H_z(z).toFixed(2)} km/s/Mpc, Age: ${age_of_universe(z).toFixed(2)} Gyr`,
+                xaxis: { title: 'Wavelength (Å)', range: [0, 16000] },
+                yaxis: { title: 'Intensity', range: [0, 0.01] },
+                legend: { orientation: 'h' }
+            };
+
+            Plotly.newPlot('plot', data, layout);
+        }
+
+        // Initialize the plot
+        updatePlot();
+    </script>
+</body>
+</html>
+

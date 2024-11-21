@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <title>Corrimiento Cosmológico de Espectros</title>
+</head>
+<body>
+    <h1>Corrimiento Cosmológico de Líneas Espectrales</h1>
+    <label for="zSlider">Corrimiento al rojo (z): </label>
+    <input type="range" id="zSlider" min="0" max="10" step="0.1" value="0" oninput="actualizarGrafico()">
+    <span id="zValue">0</span>
+    <br>
+    <label>
+        <input type="checkbox" id="mostrarLyman" checked onchange="actualizarGrafico()"> Mostrar Lyman-alpha (λ₀ = 1216 Å)
+    </label>
+    <br>
+    <label>
+        <input type="checkbox" id="mostrarHAlpha" onchange="actualizarGrafico()"> Mostrar H-alpha (λ₀ = 6563 Å)
+    </label>
+    <div id="grafico"></div>
+
+    <script>
+        // Parámetros cosmológicos
+        const H0 = 70.0; // Constante de Hubble en km/s/Mpc
+        const Omega_m = 0.27; // Densidad de materia
+        const Omega_Lambda = 0.73; // Densidad de energía oscura
+
+        // Constantes para conversiones
+        const H0_in_s = H0 * 3.24078e-20; // Convertir H0 de km/s/Mpc a 1/s
+        const s_to_Gyr = 3.16888e-17; // Segundos a Gyr
+
+        // Parámetro de Hubble H(z)
+        function H_z(z) {
+            return H0 * Math.sqrt(Omega_m * Math.pow(1 + z, 3) + Omega_Lambda);
+        }
+
+        // Integrando para calcular la edad del Universo
+        function integrando(z) {
+            return 1 / ((1 + z) * H_z(z));
+        }
+
+        // Método de integración trapezoidal
+        function integrar(func, inicio, fin, pasos = 1000) {
+            const dz = (fin - inicio) / pasos;
+            let suma = 0;
+            for (let i = 0; i < pasos; i++) {
+                const z1 = inicio + i * dz;
+                const z2 = z1 + dz;
+                suma += 0.5 * (func(z1) + func(z2)) * dz;
+            }
+            return suma;
+        }
+
+        // Edad del Universo para un corrimiento al rojo z
+        function edadUniverso(z) {
+            const edad = integrar(integrando, z, 1000); // Aproximar infinito
+            return edad * s_to_Gyr; // Convertir a Gyr
+        }
+
+        // Perfil de línea Gaussiana
+        function gaussiana(x, mu, sigma) {
+            return (1 / (sigma * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2));
+        }
+
+        // Actualizar el gráfico
+        function actualizarGrafico() {
+            const z = parseFloat(document.getElementById("zSlider").value);
+            const mostrarLyman = document.getElementById("mostrarLyman").checked;
+            const mostrarHAlpha = document.getElementById("mostrarHAlpha").checked;
+            document.getElementById("zValue").innerText = z;
+
+            const lambda = Array.from({ length: 1000 }, (_, i) => i * 16); // Rango de longitudes de onda
+            const sigma = 50;
+            const visibleMin = 4000;
+            const visibleMax = 7000;
+
+            const data = [];
+
+            // Espectro visible (4000 Å a 7000 Å)
+            data.push({
+                x: [visibleMin, visibleMax, visibleMax, visibleMin],
+                y: [0, 0, 1, 1],
+                type: 'scatter',
+                fill: 'toself',
+                fillcolor: 'rgba(255,192,203,0.5)',
+                line: { width: 0 },
+                hoverinfo: 'skip',
+                name: 'Espectro visible'
+            });
+
+            // Línea Lyman-alpha
+            if (mostrarLyman) {
+                const lambdaLyman = 1216;
+                const lymanReposo = lambda.map(l => gaussiana(l, lambdaLyman, sigma));
+                const lymanCorrida = lambda.map(l => gaussiana(l, lambdaLyman * (1 + z), sigma));
+
+                data.push({
+                    x: lambda,
+                    y: lymanReposo,
+                    type: 'scatter',
+                    mode: 'lines',
+                    line: { color: 'red' },
+                    name: `Lyman-alpha (z=0)`
+                });
+
+                data.push({
+                    x: lambda,
+                    y: lymanCorrida,
+                    type: 'scatter',
+                    mode: 'lines',
+                    line: { color: 'blue' },
+                    name: `Lyman-alpha (z=${z})`
+                });
+            }
+
+            // Línea H-alpha
+            if (mostrarHAlpha) {
+                const lambdaHAlpha = 6563;
+                const hAlphaReposo = lambda.map(l => gaussiana(l, lambdaHAlpha, sigma));
+                const hAlphaCorrida = lambda.map(l => gaussiana(l, lambdaHAlpha * (1 + z), sigma));
+
+                data.push({
+                    x: lambda,
+                    y: hAlphaReposo,
+                    type: 'scatter',
+                    mode: 'lines',
+                    line: { color: 'brown' },
+                    name: `H-alpha (z=0)`
+                });
+
+                data.push({
+                    x: lambda,
+                    y: hAlphaCorrida,
+                    type: 'scatter',
+                    mode: 'lines',
+                    line: { color: 'darkblue' },
+                    name: `H-alpha (z=${z})`
+                });
+            }
+
+            // Configuración del diseño
+            const layout = {
+                title: `H(z): ${H_z(z).toFixed(2)} km/s/Mpc, Edad: ${edadUniverso(z).toFixed(2)} Gyr`,
+                xaxis: {
+                    title: 'Longitud de onda (Å)',
+                    titlefont: { size: 14 },
+                    tickfont: { size: 12 },
+                    range: [0, 16000],
+                    tickformat: ',d' // Asegura que se muestren los números
+                },
+                yaxis: {
+                    title: 'Intensidad',
+                    titlefont: { size: 14 },
+                    tickfont: { size: 12 },
+                    range: [0, 0.01]
+                },
+                legend: { orientation: 'h', font: { size: 12 } }
+            };
+
+            Plotly.newPlot('grafico', data, layout);
+        }
+
+        // Inicializar el gráfico
+        actualizarGrafico();
+    </script>
+    
+    <p>El notebook interactivo de Python está disponible en nuestro repositorio de <a href="https://github.com/wbandabarragan/computational-physics/blob/main/fisica-interactiva/corrimiento-cosmologico.ipynb">GitHub</a>. Revísalo.</p>
+
+	<p>Elaborado por el Grupo de Física Computacional cPhys+ en la Universidad Yachay Tech, Ecuador.</p>
+
+</body>
+</html>
+
