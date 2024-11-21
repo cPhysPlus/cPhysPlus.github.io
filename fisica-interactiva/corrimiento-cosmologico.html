@@ -53,11 +53,12 @@
             return suma;
         }
 
-        // Edad del Universo para un corrimiento al rojo z
-        function edadUniverso(z) {
-            const edad = integrar(integrando, z, 1000); // Aproximar infinito
-            return edad * s_to_Gyr; // Convertir a Gyr
-        }
+		// Edad del Universo para un corrimiento al rojo z
+		function edadUniverso(z) {
+			const z_max = 100; // Limitar el infinito a un valor suficientemente grande
+			const edad = integrar(integrando, z, z_max, 10000); // Más pasos para mayor precisión
+			return edad * s_to_Gyr; // Convertir a Gyr
+		}
 
         // Perfil de línea Gaussiana
         function gaussiana(x, mu, sigma) {
@@ -142,7 +143,7 @@
 
             // Configuración del diseño
             const layout = {
-                title: `H(z): ${H_z(z).toFixed(2)} km/s/Mpc, Edad: ${edadUniverso(z).toFixed(2)} Gyr`,
+                title: `H(z): ${H_z(z).toFixed(2)} km/s/Mpc`,
                 xaxis: {
                     title: 'Longitud de onda (Å)',
                     titlefont: { size: 14 },
