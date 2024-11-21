@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partícula Cuántica en 2D</title>
+    <style>
+        /* Styling for the GIF and controls */
+        #gif-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        #gif {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="gif-container">
+        <h2>Partícula Cuántica en 2D</h2>
+        <img id="gif" src="/Users/wbandabarragan/Dropbox/GitHub_Repos/cPhysPlus.github.io/img/plots/funcion-onda2D.gif" alt="Partícula Cuántica en 2D" />
+        <br>
+        <button id="start-btn">Start</button>
+        <button id="pause-btn">Pause</button>
+    </div>
+
+    <script>
+        // Get the GIF and buttons from the DOM
+        const gif = document.getElementById("gif");
+        const startBtn = document.getElementById("start-btn");
+        const pauseBtn = document.getElementById("pause-btn");
+
+        // Function to start the GIF animation by setting the GIF source again
+        startBtn.addEventListener("click", function() {
+            const src = gif.src;
+            gif.src = '';  // Temporarily stop animation by removing the src
+            setTimeout(() => {
+                gif.src = src;  // Restart the animation by reassigning the original source
+            }, 50);  // Small timeout to allow the browser to reset the GIF
+        });
+
+        // Function to pause the GIF (stop the animation by setting a blank src)
+        pauseBtn.addEventListener("click", function() {
+            gif.src = '';  // Stop the animation by removing the source
+        });
+    </script>
+
+</body>
+</html>
+
