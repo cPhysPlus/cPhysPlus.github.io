@@ -91,6 +91,29 @@
     border-radius: 10px; /* Bordes redondeados */
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); /* Sombra para resaltar */
   }
+    #contact {
+    text-align: center;
+    margin: 3rem 0;
+  }
+  #contact h2 {
+    color: #4caf50; /* Color de énfasis */
+    margin-bottom: 1rem;
+  }
+  .registration-container {
+    margin-top: 1rem;
+  }
+  .registration-image {
+    width: 200px; /* Tamaño cuadrado */
+    height: 200px;
+    border: 2px solid #4caf50; /* Borde verde de énfasis */
+    border-radius: 10px; /* Bordes redondeados */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); /* Sombra para resaltar */
+    cursor: pointer; /* Cursor de mano al pasar sobre la imagen */
+    transition: transform 0.3s ease; /* Animación al pasar el mouse */
+  }
+  .registration-image:hover {
+    transform: scale(1.1); /* Aumenta el tamaño al pasar el mouse */
+  }
   </style>
 </head>
 <body>
@@ -274,6 +297,11 @@
     <section id="contact">
       <h2>Registro</h2>
       <p>Para registrarte, visita este enlace: <a href="https://forms.gle/YAfRn4LFHN6zQmfK7">https://forms.gle/YAfRn4LFHN6zQmfK7</a>.</p>
+        <div class="registration-container">
+          <a href="https://forms.gle/YAfRn4LFHN6zQmfK7" target="_blank">
+          <img src="img/registro.png" alt="Registro" class="registration-image">
+          </a>
+        </div>
     </section>
 
     <section class="logos">
