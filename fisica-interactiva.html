@@ -10,13 +10,13 @@
     <style>
         /* Custom styles for two sections per row */
         .row-section {
-            display: flex;
+            display: flex !important; /* Force flexbox */
             flex-wrap: wrap;
             margin: 20px 0;
         }
 
         .section-half {
-            flex: 1 1 50%; /* Cada sección ocupa el 50% del ancho */
+            flex: 1 1 50% !important; /* Force 50% width */
             padding: 20px;
             box-sizing: border-box;
             border: 1px solid #eee;
