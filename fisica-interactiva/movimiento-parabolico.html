@@ -15,7 +15,7 @@
             margin: 20px 0;
         }
         #plotly-graph {
-            width: 80%;
+            width: 100%; /* Make it responsive */
             height: 600px;
             margin: 0 auto;
         }
@@ -26,7 +26,6 @@
 <h2>Movimiento Parabólico</h2>
 <p>Utiliza los desplazadores para seleccionar las condiciones iniciales del lanzamiento parabólico.</p>
 
-<!-- Desplazadores para velocidad inicial y ángulo -->
 <div class="slider-container">
     <label for="v0_slider">Velocidad Inicial(v<sub>0</sub>) [m/s]:</label>
     <input type="range" id="v0_slider" min="1" max="50" value="20" step="1">
@@ -39,7 +38,6 @@
     <span id="alpha_value">45</span> °
 </div>
 
-<!-- Plotly Graph -->
 <div id="plotly-graph"></div>
 
 <script>
@@ -98,11 +96,12 @@
                 range: [-1, max_y + 1]
             },
             showlegend: true,
-            template: 'plotly_white'
+            template: 'plotly_white',
+            responsive: true // Make the plot responsive
         };
-        
+
         // Actualizar plot
-        Plotly.newPlot('plotly-graph', [trace], layout);  
+        Plotly.newPlot('plotly-graph', [trace], layout);
     }
 
     // Obtención de información de desplazadores
@@ -123,6 +122,11 @@
 
     // Plot inicial
     grafico(v0_slider.value, alpha_slider.value);
+
+    // Update the plot on window resize
+    window.addEventListener('resize', function() {
+        grafico(v0_slider.value, alpha_slider.value);
+    });
 </script>
 
 <p>El notebook interactivo de Python está disponible en nuestro repositorio de <a href="https://github.com/wbandabarragan/computational-physics/blob/main/fisica-interactiva/movimiento-parabolico.ipynb">GitHub</a>. Revísalo.</p>
@@ -131,4 +135,3 @@
 
 </body>
 </html>
-
