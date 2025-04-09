@@ -77,6 +77,29 @@
         const [x, y, t_vuelo, x_vuelo, y_vuelo] = parabolico(v0, alpha_g);
         const [max_x, max_y] = extremos(v0, 90, 45);
 
+        const titleText = `Velocidad inicial = ${v0} m/s, Tiempo de Vuelo = ${t_vuelo.toFixed(2)}s, Alcance Máximo = ${x_vuelo.toFixed(2)}m, Altura Máxima = ${y_vuelo.toFixed(2)}m`;
+
+        // Function to wrap the title text
+        function wrapTitle(text, maxWidth) {
+            const words = text.split(' ');
+            let lines = [];
+            let currentLine = '';
+
+            words.forEach(word => {
+                if (currentLine.length + word.length + 1 <= maxWidth) {
+                    currentLine += (currentLine ? ' ' : '') + word;
+                } else {
+                    lines.push(currentLine);
+                    currentLine = word;
+                }
+            });
+
+            lines.push(currentLine);
+            return lines.join('<br>');
+        }
+
+        const wrappedTitle = wrapTitle(titleText, 40); // Adjust 40 to your desired max line length
+
         const trace = {
             x: x,
             y: y,
@@ -86,7 +109,13 @@
         };
 
         const layout = {
-            title: `Velocidad inicial = ${v0} m/s, Tiempo de Vuelo = ${t_vuelo.toFixed(2)}s, Alcance Máximo = ${x_vuelo.toFixed(2)}m, Altura Máxima = ${y_vuelo.toFixed(2)}m`,
+            title: {
+                text: wrappedTitle,
+                yanchor: 'top',
+                y: 0.9,
+                xanchor: 'center',
+                x: 0.5,
+            },
             xaxis: {
                 title: 'x [m]',
                 range: [-1, max_x + 1]
@@ -97,10 +126,9 @@
             },
             showlegend: true,
             template: 'plotly_white',
-            responsive: true // Make the plot responsive
+            responsive: true
         };
 
-        // Actualizar plot
         Plotly.newPlot('plotly-graph', [trace], layout);
     }
 
