@@ -3,122 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Física Interactiva</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <title>Movimiento Parabólico</title>
+    <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist@2.17.0/plotly.min.js"></script>
     <style>
-        /* Custom styles for two sections per row */
-        .row-section {
-            display: flex;
-            flex-wrap: wrap;
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        .slider-container {
             margin: 20px 0;
         }
-
-        .section-half {
-            flex: 1 1 50%; /* Cada sección ocupa el 50% del ancho */
-            padding: 20px;
-            box-sizing: border-box;
-            border: 1px solid #eee;
-            margin: 10px;
-            background-color: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .section-half h2 {
-            color: #0c2e8a;
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-
-        .section-half p {
-            line-height: 1.6;
-        }
-
-        .section-half .plot img {
-            max-width: 100%;
-            max-height: 300px;
-            width: auto;
-            height: auto;
-            display: block;
-            margin-bottom: 20px;
-        }
-
-        .section-half .equations {
-            margin-bottom: 20px;
-        }
-
-        .section-half a {
-            display: inline-block;
-            background-color: #50d8af;
-            color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-
-        .section-half a:hover {
-            background-color: #2dc899;
+        #plotly-graph {
+            width: 100%; /* Make it responsive */
+            height: 600px;
+            margin: 0 auto;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Física y Astronomía Interactiva</h1>
-        <p>Aquí incluimos algunos ejemplos didácticos sobre física y astronomía. Los notebooks de Python te permiten ejecutar y/o modificar el código a tu gusto. Las páginas interactivas te permiten visualizar los efectos que tienen los parámetros de cada problema.</p>
-    </header>
 
-    <main>
-        <div class="row-section">
-            <section id="movimiento-parabolico" class="section-half">
-                <h2>1. Movimiento Parabólico</h2>
-                <p>El movimiento parabólico estudia la trayectoria de un objeto bajo la influencia de la gravedad.</p>
-                <div class="plot">
-                    <img src="img/plots/parabolico.png" alt="Movimiento Parabólico (Wikipedia)">
-                </div>
-                <div class="equations">
-                    <p>Ecuaciones del Movimiento parabólico:</p>
-                    <p>Desplazamiento en \(x\): \(x(t) = v_0 \cos(\theta) t\)</p>
-                    <p>Desplazamiento en \(y\): \(y(t) = y_0 + v_0 \sin(\theta) t - \frac{1}{2} g t^2\)</p>
-                </div>
-                <a href="fisica-interactiva/movimiento-parabolico.html">Sitio Interactivo</a>
-            </section>
+<h2>Movimiento Parabólico</h2>
+<p>Utiliza los desplazadores para seleccionar las condiciones iniciales del lanzamiento parabólico.</p>
 
-            <section id="corrimiento-cosmologico" class="section-half">
-                <h2>2. Corrimiento Cosmológico de Líneas Espectrales</h2>
-                <p>Las líneas espectrales se corren al rojo debido a la expansión del Universo.</p>
-                <div class="plot">
-                    <img src="img/plots/redshift.jpg" alt="Corrimiento al Rojo Cosmológico (NASA/JPL-Caltech)">
-                </div>
-                <div class="equations">
-                    <p>Ecuaciones:</p>
-                    <p>Longitud de onda: \(\lambda_{obs} = \lambda_{em} (1 + z)\)</p>
-                    <p>Frecuencia: \(\nu_{obs} = \frac{\nu_{em}}{1 + z}\)</p>
-                </div>
-                <a href="fisica-interactiva/corrimiento-cosmologico.html">Sitio Interactivo</a>
-            </section>
-        </div>
+<div class="slider-container">
+    <label for="v0_slider">Velocidad Inicial(v<sub>0</sub>) [m/s]:</label>
+    <input type="range" id="v0_slider" min="1" max="50" value="20" step="1">
+    <span id="v0_value">20</span> m/s
+</div>
 
-        <div class="row-section">
-            <section id="particula-cuantica" class="section-half">
-                <h2>3. Partícula cuántica en 2D</h2>
-                <p>Este es un ejemplo de una partícula cuántica dentro de un pozo de potencial infinito.</p>
-                <div class="equations">
-                </div>
-                <a href="fisica-interactiva/particula-cuantica.html">Sitio Interactivo</a>
-            </section>
+<div class="slider-container">
+    <label for="alpha_slider">Ángulo de Lanzamiento (α) [°]:</label>
+    <input type="range" id="alpha_slider" min="0" max="90" value="45" step="1">
+    <span id="alpha_value">45</span> °
+</div>
 
-             <section class="section-half">
-                <h2>Placeholder Section</h2>
-                <p>This is a placeholder section to demonstrate two sections per row. you can add more sections here.</p>
-            </section>
-        </div>
+<div id="plotly-graph"></div>
 
-    </main>
+<script>
+    const g = 9.8; // Aceleración gravitatoria (m/s^2)
+    const x0 = 0; // Posición inicial en x
+    const y0 = 0; // Posición inicial en y
 
-    <footer>
-        <p>© 2025 cPhys+ Group</p>
-    </footer>
+    // Function to convert degrees to radians
+    Math.radians = function(degrees) {
+        return degrees * Math.PI / 180;
+    };
+
+    // Función para obtener coordenadas del mov. parabólico
+    function parabolico(v0, alpha_g) {
+        const alpha = Math.radians(alpha_g);
+        const t_vuelo = 2 * v0 * Math.sin(alpha) / g;
+        const x_vuelo = (v0 ** 2 * Math.sin(2 * alpha)) / g;
+        const y_vuelo = (v0 * Math.sin(alpha)) ** 2 / (2 * g);
+        const t = Array.from({ length: 1000 }, (_, i) => i * t_vuelo / 999);
+        const x = t.map(ti => x0 + v0 * Math.cos(alpha) * ti);
+        const y = t.map(ti => y0 + v0 * Math.sin(alpha) * ti - 0.5 * g * ti ** 2);
+        return [x, y, t_vuelo, x_vuelo, y_vuelo];
+    }
+
+    // Obtener máximos
+    function extremos(v0, a1, a2) {
+        const max_a1 = Math.radians(a1);
+        const max_a2 = Math.radians(a2);
+        const max_t = 2 * v0 * Math.sin(max_a1) / g;
+        const max_y = (v0 * Math.sin(max_a1)) ** 2 / (2 * g);
+        const max_x = (v0 ** 2 * Math.sin(2 * max_a2)) / g;
+        return [max_x, max_y, max_t];
+    }
+
+    // Actualizar plot
+    function grafico(v0, alpha_g) {
+        const [x, y, t_vuelo, x_vuelo, y_vuelo] = parabolico(v0, alpha_g);
+        const [max_x, max_y] = extremos(v0, 90, 45);
+
+        const trace = {
+            x: x,
+            y: y,
+            mode: 'lines',
+            name: `α = ${alpha_g}°`,
+            line: { color: 'magenta' }
+        };
+
+        const layout = {
+            title: `Velocidad inicial = ${v0} m/s, Tiempo de Vuelo = ${t_vuelo.toFixed(2)}s, Alcance Máximo = ${x_vuelo.toFixed(2)}m, Altura Máxima = ${y_vuelo.toFixed(2)}m`,
+            xaxis: {
+                title: 'x [m]',
+                range: [-1, max_x + 1]
+            },
+            yaxis: {
+                title: 'y [m]',
+                range: [-1, max_y + 1]
+            },
+            showlegend: true,
+            template: 'plotly_white',
+            responsive: true // Make the plot responsive
+        };
+
+        // Actualizar plot
+        Plotly.newPlot('plotly-graph', [trace], layout);
+    }
+
+    // Obtención de información de desplazadores
+    const v0_slider = document.getElementById("v0_slider");
+    const alpha_slider = document.getElementById("alpha_slider");
+    const v0_value = document.getElementById("v0_value");
+    const alpha_value = document.getElementById("alpha_value");
+
+    v0_slider.addEventListener("input", function() {
+        v0_value.textContent = v0_slider.value;
+        grafico(v0_slider.value, alpha_slider.value);
+    });
+
+    alpha_slider.addEventListener("input", function() {
+        alpha_value.textContent = alpha_slider.value;
+        grafico(v0_slider.value, alpha_slider.value);
+    });
+
+    // Plot inicial
+    grafico(v0_slider.value, alpha_slider.value);
+
+    // Update the plot on window resize
+    window.addEventListener('resize', function() {
+        grafico(v0_slider.value, alpha_slider.value);
+    });
+</script>
+
+<p>El notebook interactivo de Python está disponible en nuestro repositorio de <a href="https://github.com/wbandabarragan/computational-physics/blob/main/fisica-interactiva/movimiento-parabolico.ipynb">GitHub</a>. Revísalo.</p>
+
+<p>Elaborado por el Grupo de Física Computacional cPhys+ en la Universidad Yachay Tech, Ecuador.</p>
+
 </body>
 </html>
