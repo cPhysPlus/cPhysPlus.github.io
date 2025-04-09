@@ -8,15 +8,41 @@
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Centrar horizontalmente */
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        header, main, footer {
+            width: 80%; /* Ancho del contenido */
+            max-width: 1200px; /* Ancho máximo */
+            box-sizing: border-box;
+            padding: 20px;
+        }
+
+        /* Banner */
+        .banner {
+            background-color: #0c2e8a;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
         /* Custom styles for two sections per row */
         .row-section {
-            display: flex !important; /* Force flexbox */
+            display: flex;
             flex-wrap: wrap;
             margin: 20px 0;
+            width: 100%; /* Asegurar que las filas ocupen todo el ancho */
         }
 
         .section-half {
-            flex: 1 1 50% !important; /* Force 50% width */
+            flex: 1 1 50%;
             padding: 20px;
             box-sizing: border-box;
             border: 1px solid #eee;
@@ -64,6 +90,10 @@
     </style>
 </head>
 <body>
+    <div class="banner">
+        ¡Explora los Fenómenos del Universo con Nuestras Herramientas Interactivas!
+    </div>
+
     <header>
         <h1>Física y Astronomía Interactiva</h1>
         <p>Aquí incluimos algunos ejemplos didácticos sobre física y astronomía. Los notebooks de Python te permiten ejecutar y/o modificar el código a tu gusto. Las páginas interactivas te permiten visualizar los efectos que tienen los parámetros de cada problema.</p>
