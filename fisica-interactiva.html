@@ -1,70 +1,123 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Física Interactiva</title>
-  <!-- Enlace CSS y MathJax -->
-  <link rel="stylesheet" href="css/styles.css">
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Física Interactiva</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        /* Custom styles for two sections per row */
+        .row-section {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .section-half {
+            flex: 1 1 50%; /* Each section takes up 50% width */
+            padding: 20px;
+            box-sizing: border-box;
+            border: 1px solid #eee;
+            margin: 10px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-half h2 {
+            color: #0c2e8a;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .section-half p {
+            line-height: 1.6;
+        }
+
+        .section-half .plot img {
+            max-width: 100%;
+            max-height: 300px;
+            width: auto;
+            height: auto;
+            display: block;
+            margin-bottom: 20px;
+        }
+
+        .section-half .equations {
+            margin-bottom: 20px;
+        }
+
+        .section-half a {
+            display: inline-block;
+            background-color: #50d8af;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .section-half a:hover {
+            background-color: #2dc899;
+        }
+    </style>
 </head>
 <body>
-  <header>
-    <h1>Física y Astronomía Interactiva </h1>
-    <p>Aquí incluimos algunos ejemplos didácticos sobre física y astronomía. Los notebooks de Python te permiten ejecutar y/o modificar el código a tu gusto. Las páginas interactivas te permiten visualizar los efectos que tienen los parámetros de cada problema.</p>
-  </header>
+    <header>
+        <h1>Física y Astronomía Interactiva</h1>
+        <p>Aquí incluimos algunos ejemplos didácticos sobre física y astronomía. Los notebooks de Python te permiten ejecutar y/o modificar el código a tu gusto. Las páginas interactivas te permiten visualizar los efectos que tienen los parámetros de cada problema.</p>
+    </header>
 
-  <main>
-    <!-- Movimiento Parabólico -->
-    <section id="movimiento-parabolico">
-      <h2>1. Movimiento Parabólico</h2>
-      <p>El movimiento parabólico estudia la trayectoria de un objeto bajo la influencia de la gravedad.</p>
-      <div class="plot">
-        <img src="img/plots/parabolico.png" alt="Movimiento Parabólico (Wikipedia)" style="max-width: 100%; max-height: 300px; width: auto; height: auto; display: block; float: left; margin-right: 40px;">
-      </div>
-      <div style="clear: both;"></div> 
-      <div class="equations">
-        <p>Ecuaciones del Movimiento parabólico:</p>
-        <p>Desplazamiento en \(x\): \(x(t) = v_0 \cos(\theta) t\)</p>
-        <p>Desplazamiento en \(y\): \(y(t) = y_0 + v_0 \sin(\theta) t - \frac{1}{2} g t^2\)</p>
-      </div>
-      <a href="fisica-interactiva/movimiento-parabolico.html">Sitio Interactivo</a>
-    </section>
+    <main>
+        <div class="row-section">
+            <section id="movimiento-parabolico" class="section-half">
+                <h2>1. Movimiento Parabólico</h2>
+                <p>El movimiento parabólico estudia la trayectoria de un objeto bajo la influencia de la gravedad.</p>
+                <div class="plot">
+                    <img src="img/plots/parabolico.png" alt="Movimiento Parabólico (Wikipedia)">
+                </div>
+                <div class="equations">
+                    <p>Ecuaciones del Movimiento parabólico:</p>
+                    <p>Desplazamiento en \(x\): \(x(t) = v_0 \cos(\theta) t\)</p>
+                    <p>Desplazamiento en \(y\): \(y(t) = y_0 + v_0 \sin(\theta) t - \frac{1}{2} g t^2\)</p>
+                </div>
+                <a href="fisica-interactiva/movimiento-parabolico.html">Sitio Interactivo</a>
+            </section>
 
-    <!-- Corrimiento Cosmológico de Líneas Espectrales -->
-    <section id="corrimiento-cosmologico">
-      <h2>2. Corrimiento Cosmológico de Líneas Espectrales</h2>
-      <p>Las líneas espectrales se corren al rojo debido a la expansión del Universo.</p>
-      <div class="plot">
-        <img src="img/plots/redshift.jpg" alt="Corrimiento al Rojo Cosmológico (NASA/JPL-Caltech" style="max-width: 100%; max-height: 300px; width: auto; height: auto; display: block; float: left; margin-right: 40px;">
-      </div>
-      <div style="clear: both;"></div> 
-      <div class="equations">
-        <p>Ecuaciones:</p>
-        <p>Longitud de onda: \(\lambda_{obs} = \lambda_{em} (1 + z)\)</p>
-        <p>Frecuencia: \(\nu_{obs} = \frac{\nu_{em}}{1 + z}\)</p>
-      </div>
-      <a href="fisica-interactiva/corrimiento-cosmologico.html">Sitio Interactivo</a>
-    </section>
-    
-    <!-- Partículas QM 2D -->
-    <section id="corrimiento-cosmologico">
-      <h2>3. Partícula cuántica en 2D</h2>
-      <p>Este es un ejemplo de una partícula cuántica dentro de un pozo de potencial infinito.</p>
+            <section id="corrimiento-cosmologico" class="section-half">
+                <h2>2. Corrimiento Cosmológico de Líneas Espectrales</h2>
+                <p>Las líneas espectrales se corren al rojo debido a la expansión del Universo.</p>
+                <div class="plot">
+                    <img src="img/plots/redshift.jpg" alt="Corrimiento al Rojo Cosmológico (NASA/JPL-Caltech)">
+                </div>
+                <div class="equations">
+                    <p>Ecuaciones:</p>
+                    <p>Longitud de onda: \(\lambda_{obs} = \lambda_{em} (1 + z)\)</p>
+                    <p>Frecuencia: \(\nu_{obs} = \frac{\nu_{em}}{1 + z}\)</p>
+                </div>
+                <a href="fisica-interactiva/corrimiento-cosmologico.html">Sitio Interactivo</a>
+            </section>
+        </div>
 
-      <div style="clear: both;"></div> 
-      <div class="equations">
+        <div class="row-section">
+            <section id="particula-cuantica" class="section-half">
+                <h2>3. Partícula cuántica en 2D</h2>
+                <p>Este es un ejemplo de una partícula cuántica dentro de un pozo de potencial infinito.</p>
+                <div class="equations">
+                </div>
+                <a href="fisica-interactiva/particula-cuantica.html">Sitio Interactivo</a>
+            </section>
+            <section class="section-half">
+                <h2>Placeholder Section</h2>
+                <p>This is a placeholder section to demonstrate two sections per row. you can add more sections here.</p>
+            </section>
+        </div>
 
-      </div>
-      <a href="fisica-interactiva/particula-cuantica.html">Sitio Interactivo</a>
-    </section>
+    </main>
 
-
-  </main>
-
-  <footer>
-    <p>© 2024 cPhys+ Group</p>
-  </footer>
+    <footer>
+        <p>© 2025 cPhys+ Group</p>
+    </footer>
 </body>
 </html>
