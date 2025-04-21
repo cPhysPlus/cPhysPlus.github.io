@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Star System Visualizer</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #111; color: white; padding: 20px; }
+    .container { max-width: 1200px; margin: auto; }
+    canvas { background: black; }
+    .plot { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Star System Visualizer</h1>
+    <div class="form-group">
+      <label for="starSelect">Select a Star:</label>
+      <select id="starSelect" class="form-select">
+        <option>Sun-G</option>
+        <option>Proxima Centauri-M</option>
+        <option>Kepler-90-G</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 plot" id="orbitPlot"></div>
+      <div class="col-md-6 plot" id="tempPlot"></div>
+    </div>
+
+    <pre class="text-light mt-3" style="font-size: 0.9em;">
+Teff: Theoretical average surface temperature of a Star.
+Teq: Temperature of a planet in radiative equilibrium.
+Ts: Real temperature measured at the planet's surface.
+To: Temperature considering a perfect black body.
+Note: The vertical lines represent differences between Teq and Ts for each planet.
+    </pre>
+  </div>
+
+  <script>
+    const sigma = 5.67e-8;
+    const L_sun = 3.828e26;
+    const UA = 1.496e11;
+    const R_sun = 0.00465;
+
+    const starsData = {
+      "Sun-G": {
+        T_eff: 5778, R_star: 1, L_star: 1.0, color: 'yellow',
+        planets: {
+          Earth: { a: 1.0, e: 0.017, color: 'cyan', Albedo: 0.294, g: 0.384 },
+          Venus: { a: 0.723, e: 0.007, color: 'orange', Albedo: 0.77, g: 0.991 },
+          Marth: { a: 1.524, e: 0.093, color: 'red', Albedo: 0.25, g: 0.085 }
+        }
+      },
+      "Proxima Centauri-M": {
+        T_eff: 3042, R_star: 0.154, L_star: 0.0017, color: 'red',
+        planets: {
+          "Próxima b": { a: 0.0485, e: 0.02, color: 'teal' }
+        }
+      },
+      "Kepler-90-G": {
+        T_eff: 6080, R_star: 1.2, L_star: 1.7, color: 'gold',
+        planets: {
+          "Kepler-90b": { a: 0.074, e: 0, color: 'skyblue' },
+          "Kepler-90c": { a: 0.089, e: 0, color: 'lightgreen' },
+          "Kepler-90i": { a: 0.12, e: 0, color: 'lightgray' },
+          "Kepler-90d": { a: 0.32, e: 0, color: 'salmon' },
+          "Kepler-90e": { a: 0.42, e: 0, color: 'gold' },
+          "Kepler-90f": { a: 0.48, e: 0, color: 'darkorange' },
+          "Kepler-90g": { a: 0.71, e: 0, color: 'tomato' },
+          "Kepler-90h": { a: 1.01, e: 0, color: 'goldenrod' }
+        }
+      }
+    };
+
+    function calculateOrbit(a, e) {
+      let theta = Array.from({ length: 1000 }, (_, i) => i * 2 * Math.PI / 1000);
+      return theta.map(t => {
+        let r = (a * (1 - e ** 2)) / (1 + e * Math.cos(t));
+        return { x: r * Math.cos(t), y: r * Math.sin(t) };
+      });
+    }
+
+    function habitableZoneBorders(L_star) {
+      return {
+        r_min: 0.95 * Math.sqrt(L_star),
+        r_max: 1.37 * Math.sqrt(L_star)
+      };
+    }
+
+    function temperatureProfile(L_star, R_star) {
+      let R_star_UA = R_star * R_sun;
+      let r_UA = Array.from({ length: 1000 }, (_, i) => R_star_UA + i * (9 - R_star_UA) / 999);
+      let T_r = r_UA.map(r => {
+        let r_m = r * UA;
+        return Math.pow(L_star * L_sun / (16 * Math.PI * sigma * r_m ** 2), 0.25);
+      });
+      return { r_UA, T_r };
+    }
+
+    function planetTemperatures(L_star, planet) {
+      if (!planet.Albedo || !planet.g) return [null, null, null];
