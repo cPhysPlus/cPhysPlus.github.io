@@ -20,7 +20,7 @@
     const R_sun = 0.00465;
 
     const stars = {
-      "Sun-G": {
+      "Sol-G": {
         T_eff: 5778, R_star: 1, L_star: 1.0, color: 'yellow',
         planets: {
           Earth: { a: 1.0, e: 0.017, color: 'cyan', Albedo: 0.294, g: 0.384 },
@@ -91,7 +91,7 @@
         x: Array.from({length: 80}, () => Math.random() * 5 - 2.5),
         y: Array.from({length: 80}, () => Math.random() * 5 - 2.5),
         mode: 'markers',
-        marker: { size: 2, color: 'white', opacity: 0.4 },
+        marker: { size: 2, color: 'white', opacity: 0.95 },
         type: 'scatter',
         showlegend: false
       };
