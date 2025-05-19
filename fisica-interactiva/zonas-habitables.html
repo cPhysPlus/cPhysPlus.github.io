@@ -1,186 +1,361 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Zonas Habitables alrededor de Estrellas</title>
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <title>Sistema Estelar Interactivo</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        body {background-color: black;color: white;font-family: Arial, sans-serif;padding: 20px;margin: 0;}
+        .container {display: flex;flex-direction: column;align-items: center;max-width: 1200px;margin: 0 auto;}
+        .dropdown-container {margin-bottom: 20px;width: 100%;text-align: center;}
+        select {padding: 8px;background-color: #333;color: white;border: 1px solid #555;border-radius: 4px;width: 300px;max-width: 100%;}
+        .plot-container {width: 100%;max-width: 800px;height: 500px;margin: 20px auto;position: relative;overflow: hidden;}
+        
+        @media (max-width: 768px) {.plot-container {height: 400px;}
+            select {width: 100%;max-width: 300px;}}
+    </style>
 </head>
-<body style="background-color: black; color: white; font-family: sans-serif;">
+<body>
+    <div class="container">
+        <h1>Habitable zones in stellar systems</h1>
+        
+        <div class="dropdown-container">
+            <label for="starSelector">Select a star system:</label>
+            <select id="starSelector">
+                <option value="Sun">Sun</option>
+                <option value="HD 40307">HD 40307</option>
+                <option value="Proxima Centauri">Próxima Centauri</option>
+                <option value="Kepler-186">Kepler-186</option>
+                <option value="Kepler-90">Kepler-90</option>
+                <option value="K2-18">K2-18</option>
+                <option value="Trappist-1">Trappist-1</option>
+                <option value="51 Peg">51 Peg</option>
+            </select>
+        </div>
+        <div class="container">
+	     <div class="plot-container" id="orbitalPlot"></div>
+    	     <div class="plot-container" id="temperaturePlot"></div>     
+    </div>
+    <script>
 
-  <h2>Selecciona un sistema estelar:</h2>
-  <select id="starSelect" style="font-size: 16px; padding: 4px;"></select>
+	// Constantes Astronomicas
+        const sigma = 5.67e-8;
+        const L_sun = 3.828e26;
+        const UA = 1.496e11;
+        const R_sun = 0.00465;
 
-  <div id="orbitPlot" style="width: 45vw; height: 600px; display: inline-block;"></div>
-  <div id="tempPlot" style="width: 50vw; height: 600px; display: inline-block;"></div>
+	// Diccionario estelar
+        const stars_data = {
+            'Sun': {
+                'T_eff': 5778,
+                'T_type': 'G',
+                'R_star': 1,
+                'L_star': 1,
+                'color': 'yellow',
+                'planets': {
+                    'Earth': {'a': 1.0, 'e': 0.017, 'color': 'blue', 'Albedo': 0.294, 'g': 0.384},
+                    'Mercury': {'a': 0.387, 'e': 0.2056, 'color': 'orange', 'Albedo': 0.068, 'g': 0},
+                    'Venus': {'a': 0.723, 'e': 0.0068, 'color': 'red', 'Albedo': 0.77, 'g': 0.991},
+                    'Marth': {'a': 1.524, 'e': 0.093, 'color': 'coral', 'Albedo': 0.25, 'g': 0.085}
+                }
+            },
+            'HD 40307': {
+                'R_star': 0.71668,
+                'T_eff': 4805,
+                'T_type': 'K',
+                'L_star': 0.2605,
+                'color': 'orange',
+                'planets': {
+                    'HD 40307 b': {'a': 0.0475, 'e': 0.12, 'color': 'maroon'},
+                    'HD 40307 c': {'a': 0.0812, 'e': 0.05, 'color': 'firebrick'},
+                    'HD 40307 d': {'a': 0.134, 'e': 0.07, 'color': 'brown'},
+                    'HD 40307 f': {'a': 0.2485, 'e': 0.19, 'color': 'orange'},
+                    'HD 40307 g': {'a': 0.6, 'e': 0.29, 'color': 'yellow'}
+                }
+            },
+            'Proxima Centauri': {
+                'R_star': 0.154,
+                'T_eff': 3042,
+                'T_type': 'M',
+                'L_star': 0.0017,
+                'color': 'red',
+                'planets': {
+                    'Próxima b': {'a': 0.0485, 'e': 0.02, 'color': 'coral'}
+                }
+            },
+            'Kepler-186': {
+                'R_star': 0.5478,
+                'T_eff': 3881,
+                'T_type': 'M',
+                'L_star': 0.0612,
+                'color': 'red',
+                'planets': {
+                    'Kepler-186 b': {'a': 0.0343, 'e': 0, 'color': 'maroon'},
+                    'Kepler-186 c': {'a': 0.0451, 'e': 0, 'color': 'firebrick'},
+                    'Kepler-186 d': {'a': 0.0781, 'e': 0, 'color': 'brown'},
+                    'Kepler-186 e': {'a': 0.11, 'e': 0, 'color': 'orange'},
+                    'Kepler-186 f': {'a': 0.432, 'e': 0.04, 'color': 'gold'}
+                }
+            },
+            'Kepler-90': {
+                'R_star': 1.2,
+                'T_eff': 6080,
+                'T_type': 'G',
+                'L_star': 1.7,
+                'color': 'yellow',
+                'planets': {
+                    'Kepler-90 b': {'a': 0.074, 'e': 0, 'color': 'maroon'},
+                    'Kepler-90 c': {'a': 0.089, 'e': 0, 'color': 'brown'},
+                    'Kepler-90 i': {'a': 0.12, 'e': 0, 'color': 'red'},
+                    'Kepler-90 d': {'a': 0.32, 'e': 0, 'color': 'salmon'},
+                    'Kepler-90 e': {'a': 0.42, 'e': 0, 'color': 'gold'},
+                    'Kepler-90 f': {'a': 0.48, 'e': 0, 'color': 'darkorange'},
+                    'Kepler-90 g': {'a': 0.71, 'e': 0, 'color': 'tomato'},
+                    'Kepler-90 h': {'a': 1.01, 'e': 0, 'color': 'goldenrod'}
+                }
+            },
+            'K2-18': {
+                'R_star': 0.4445,
+                'T_eff': 3457,
+                'T_type': 'M',
+                'L_star': 0.0251,
+                'color': 'red',
+                'planets': {
+                    'K2-18 b': {'a': 0.1429, 'e': 0.28, 'color': 'cyan', 'Albedo': 0.17},
+                    'K2-18 c': {'a': 0.06, 'e': 0.47, 'color': 'coral'}
+                }
+            },
+            'Trappist-1': {
+                'R_star': 0.1192,
+                'T_eff': 2566,
+                'T_type': 'M',
+                'L_star': 0.000522,
+                'color': 'red',
+                'planets': {
+                    'Trappist-1 b': {'a': 0.01111, 'e': 0, 'color': 'maroon'},
+                    'Trappist-1 c': {'a': 0.01521, 'e': 0, 'color': 'brown'},
+                    'Trappist-1 d': {'a': 0.02144, 'e': 0, 'color': 'red'},
+                    'Trappist-1 e': {'a': 0.02817, 'e': 0.005, 'color': 'tomato'},
+                    'Trappist-1 f': {'a': 0.0371, 'e': 0.01, 'color': 'darkorange'},
+                    'Trappist-1 g': {'a': 0.0451, 'e': 0.002, 'color': 'gold'},
+                    'Trappist-1 h': {'a': 0.063, 'e': 0, 'color': 'steelblue'}
+                }
+            },
+            '51 Peg': {
+                'R_star': 1.1867,
+                'T_eff': 5773,
+                'T_type': 'G',
+                'L_star': 1.36,
+                'color': 'yellow',
+                'planets': {
+                    '51 Peg b': {'a': 0.052, 'e': 0.0069, 'color': 'firebrick'}
+                }
+            }
+        };
 
-  <script>
-    const sigma = 5.67e-8;
-    const L_sun = 3.828e26;
-    const UA = 1.496e11;
-    const R_sun = 0.00465;
+	// Permite calcular las orbitas de los planetas
+        function calculate_orbit(a, e) {
+            const theta = Array.from({length: 1000}, (_, i) => i * 2 * Math.PI / 1000);
+            const r = theta.map(t => (a * (1 - e**2)) / (1 + e * Math.cos(t)));
+            const x = r.map((r_val, i) => r_val * Math.cos(theta[i]));
+            const y = r.map((r_val, i) => r_val * Math.sin(theta[i]));
+            return {x, y};}
 
-    const stars = {
-      "Sol-G": {
-        T_eff: 5778, R_star: 1, L_star: 1.0, color: 'yellow',
-        planets: {
-          Earth: { a: 1.0, e: 0.017, color: 'cyan', Albedo: 0.294, g: 0.384 },
-          Venus: { a: 0.723, e: 0.007, color: 'orange', Albedo: 0.77, g: 0.991 },
-          Marth: { a: 1.524, e: 0.093, color: 'red', Albedo: 0.25, g: 0.085 }
-        }
-      },
-      "Proxima Centauri-M": {
-        T_eff: 3042, R_star: 0.154, L_star: 0.0017, color: 'red',
-        planets: {
-          "Próxima b": { a: 0.0485, e: 0.02, color: 'teal' }
-        }
-      },
-      "Kepler-90-G": {
-        T_eff: 6080, R_star: 1.2, L_star: 1.7, color: 'gold',
-        planets: {
-          "Kepler-90b": { a: 0.074, e: 0, color: 'skyblue' },
-          "Kepler-90c": { a: 0.089, e: 0, color: 'lightgreen' },
-          "Kepler-90i": { a: 0.12, e: 0, color: 'white' },
-          "Kepler-90d": { a: 0.32, e: 0, color: 'salmon' },
-          "Kepler-90e": { a: 0.42, e: 0, color: 'gold' },
-          "Kepler-90f": { a: 0.48, e: 0, color: 'darkorange' },
-          "Kepler-90g": { a: 0.71, e: 0, color: 'tomato' },
-          "Kepler-90h": { a: 1.01, e: 0, color: 'goldenrod' }
-        }
-      }
-    };
+	// Permite calcular los bordes de la zona habitable
+        function habitable_zone_borders(L_star, T_eff) {
+            const T_eff_diff = T_eff - 5778;
+            const Seff_min = 1.0140 + 8.1774e-5*T_eff_diff + 1.7063e-9*T_eff_diff**2 - 4.3241e-12*T_eff_diff**3 - 6.6462e-16*T_eff_diff**4;
+            const Seff_max = 0.3438 + 5.8942e-5*T_eff_diff + 1.6558e-9*T_eff_diff**2 - 3.0045e-12*T_eff_diff**3 - 5.2983e-16*T_eff_diff**4;
+            const r_min = Math.sqrt(L_star / Seff_min);
+            const r_max = Math.sqrt(L_star / Seff_max);
+            return {r_min, r_max};}
 
-    function calculate_orbit(a, e) {
-      const theta = Array.from({ length: 500 }, (_, i) => i * 2 * Math.PI / 499);
-      const r = theta.map(t => (a * (1 - e ** 2)) / (1 + e * Math.cos(t)));
-      const x = r.map((r, i) => r * Math.cos(theta[i]));
-      const y = r.map((r, i) => r * Math.sin(theta[i]));
-      return [x, y];
-    }
+	// Permite calcular las orbitas de los planetas
+        function temperature_profile(L_star, R_star) {
+            const R_star_UA = R_star * R_sun;
+            const r_UA = Array.from({length: 10000}, (_, i) => R_star_UA + i * (9 - R_star_UA) / 10000);
+            const r_m = r_UA.map(r => r * UA);
+            const T_r = r_m.map(r => Math.pow(L_star * L_sun / (16 * Math.PI * sigma * r**2), 0.25));
+            return {r_UA, T_r};}
 
-    function habitable_zone(L_star) {
-      return [0.95 * Math.sqrt(L_star), 1.37 * Math.sqrt(L_star)];
-    }
+	// Permite calcular la temperaturas To , Teq y Ts de los planetas
+	function planet_temperatures(L_star, planet) {
+	  const a = planet.a; 
+      	  if(!planet || planet.a === undefined) return [null, null, null];
+            const a_m = planet.a * UA;
+            const To = Math.pow(L_star*L_sun/(16*Math.PI*sigma*a_m**2), 0.25);
+            let Teq = null;
+            let Ts = null;
+            if (planet.Albedo !== undefined && planet.Albedo !== null) {
+               const A = planet.Albedo;
+               Teq = Math.pow((1-A)*L_star*L_sun/(16*Math.PI*sigma*a_m**2), 0.25);
+	       if (planet.g !== undefined && planet.g !== null && planet.g !== 1){
+		  const g = planet.g;
+		  Ts = Teq * Math.pow(1 / (1 - g), 0.25);}}
+	  return {To, Teq, Ts};}
 
-    function temperature_profile(L_star, R_star) {
-      const R_star_UA = R_star * R_sun;
-      const r = Array.from({ length: 1000 }, (_, i) => R_star_UA + i * (9 - R_star_UA) / 999);
-      const T = r.map(r_ua => {
-        const r_m = r_ua * UA;
-        return Math.pow(L_star * L_sun / (16 * Math.PI * sigma * r_m ** 2), 0.25);
-      });
-      return [r, T];
-    }
+	// Funcion principal permite graficar orbitas, HZ y perfil de temperatura de una estrella
+        function plotSystem(star_name) {
+            const star = stars_data[star_name];
+            const {r_min, r_max} = habitable_zone_borders(star['L_star'], star['T_eff']);
+            const {r_UA, T_r} = temperature_profile(star['L_star'], star['R_star']);
+	    const farthest_planet = Math.max(...Object.values(star.planets).map(p => p.a));
+            const viewRange = Math.max(r_max * 1.5, farthest_planet * 1.2);
+		
+	    //Fondo estelar
+ 	    const bgStars = {
+              x: Array.from({length: 200}, () => (Math.random() - 0.5) * 2 * viewRange),
+              y: Array.from({length: 200}, () => (Math.random() - 0.5) * 2 * viewRange),
+              mode: 'markers',
+              marker: { size: 2, color: 'white', opacity: 0.95 },
+              type: 'scatter',
+              showlegend: false,
+	      hoverinfo: 'none'};
 
-    function Teq_Ts(L_star, a, A, g) {
-      const a_m = a * UA;
-      const Teq = Math.pow((1 - A) * L_star * L_sun / (16 * Math.PI * sigma * a_m ** 2), 0.25);
-      const Ts = Teq * Math.pow(1 / (1 - g), 0.25);
-      return [Teq, Ts];
-    }
+            //Estrellas
+            const orbitalData = [
+	       bgStars,{
+                x: [0],
+                y: [0],
+		mode: 'markers',
+                marker: { color: star['color'], size: 10 },
+                name: star_name}];
 
-    function To(L_star, a) {
-      const a_m = a * UA;
-      return Math.pow(L_star * L_sun / (16 * Math.PI * sigma * a_m ** 2), 0.25);
-    }
+            // Planetas
+            for (const [planet_name, planet] of Object.entries(star.planets)) {
+                const orbit = calculate_orbit(planet.a, planet.e);
+                orbitalData.push({
+                    x: orbit.x,
+                    y: orbit.y,
+                    mode: 'lines',
+                    name: planet_name,
+                    line: { color: planet.color }});}
 
-    function plotSystem(starName) {
-      const star = stars[starName];
-      const [rmin, rmax] = habitable_zone(star.L_star);
-      const orbitData = [];
-      const bgStars = {
-        x: Array.from({length: 80}, () => Math.random() * 5 - 2.5),
-        y: Array.from({length: 80}, () => Math.random() * 5 - 2.5),
-        mode: 'markers',
-        marker: { size: 2, color: 'white', opacity: 0.95 },
-        type: 'scatter',
-        showlegend: false
-      };
+            // Grafico HZ
+	    const theta = Array.from({length: 500}, (_, i) => i * 2 * Math.PI / 500);
+            // Borde exterior 
+ 	    const x_outer = theta.map(t => r_max * Math.cos(t));
+            const y_outer = theta.map(t => r_max * Math.sin(t));
+            // Borde interior 
+            const x_inner = theta.map(t => r_min * Math.cos(-t));
+            const y_inner = theta.map(t => r_min * Math.sin(-t));
+            // Combinar los puntos
+            const x_ring = [...x_outer, ...x_inner];
+            const y_ring = [...y_outer, ...y_inner];
+            // Color de relleno de la HZ
+            orbitalData.push({
+    		x: x_ring,
+    		y: y_ring,
+    		fill: 'toself',
+    		fillcolor: 'rgba(0, 255, 0, 0.3)',
+    		line: { width: 2,color: 'green' },
+    		type: 'scatter',
+    		mode: 'lines',
+    		name: 'Zona Habitable',
+    		hoverinfo: 'none',
+    		showlegend: true});
 
-      for (const [pname, pdata] of Object.entries(star.planets)) {
-        const [x, y] = calculate_orbit(pdata.a, pdata.e);
-        orbitData.push({
-          x, y, name: pname,
-          mode: 'lines',
-          line: { color: pdata.color },
-          type: 'scatter'
-        });
-      }
+	    // Configuraciones del plot de HZ
+	    Plotly.newPlot('orbitalPlot', orbitalData, {
+            	title:`Stellar System: ${star_name}-${star['T_type']}`,
+            	xaxis: { title: 'AU', scaleanchor: 'y',color: 'white',range: [-viewRange, viewRange]},
+            	yaxis: { title: 'AU',color: 'white',range: [-viewRange, viewRange]},
+		margin: { l: 40, r: 30, b: 40, t: 60, pad: 2 },
+		autosize: false,
+		responsive: false,
+		paper_bgcolor: 'black',
+            	plot_bgcolor: 'black',
+            	font: { color: 'white' },
+            	showlegend: true});
 
-      const HZcircle = {
-        type: "circle",
-        xref: "x", yref: "y",
-        x0: -rmax, x1: rmax, y0: -rmax, y1: rmax,
-        fillcolor: "green", opacity: 0.2, line: { width: 0 }
-      };
+            // Gráfico de temperatura
+	    const temperatureData = [{
+   	    	x: r_UA,
+            	y: T_r,
+            	mode: 'lines',
+		line: { color: star['color'] },
+            	name: 'T(r)'}];
+	    const tempTraces = [];
+	    let AddedTeqLegend = false;
+            let AddedTsLegend = false;
+            let AddedToLegend = false;
 
-      Plotly.newPlot('orbitPlot', [...orbitData, bgStars, {
-        x: [0], y: [0], type: 'scatter', mode: 'markers',
-        marker: { color: star.color, size: 14 }, name: starName
-      }], {
-        title: `System: ${starName}`, paper_bgcolor: 'black', plot_bgcolor: 'black',
-        xaxis: { title: 'AU', range: [-1.4 * rmax, 1.4 * rmax], color: 'white' },
-        yaxis: { title: 'AU', scaleanchor: 'x', color: 'white' },
-        shapes: [HZcircle],
-        legend: { font: { color: 'white' } }
-      });
+	    for (const [planet_name, planet] of Object.entries(star.planets)) {
+    	        const {To, Teq, Ts} = planet_temperatures(star['L_star'], planet);
+              	if (Teq !== null && Ts !== null) {
+                    tempTraces.push({
+                        x: [planet.a, planet.a],
+                        y: [Teq, Ts],
+                        mode: 'lines',
+                        line: { color: '#4fc3f7', width: 2 },
+                        type: 'scatter',
+                        name: 'ΔT (Teq → Ts)',
+                        showlegend: !AddedTeqLegend,
+                        hovertemplate: `Planet: ${planet_name}<br>Distance: %{x:.2f} AU<br>Temperature: %{y:.0f} K<extra></extra>`});
+                
+                    tempTraces.push({
+                        x: [planet.a],
+                        y: [Teq],
+                        mode: 'markers',
+                        marker: { color: 'blue', size: 7, symbol: 'circle' },
+                        name: 'Teq (Equilibrium)',
+                        showlegend: !AddedTeqLegend,
+                        hovertemplate: `Planet: ${planet_name}<br>Teq: %{y:.0f} K<extra></extra>`});
+                    AddedTeqLegend = true;
 
-      const [r, T] = temperature_profile(star.L_star, star.R_star);
-      const tempTraces = [{
-        x: r, y: T,
-        type: 'scatter', mode: 'lines',
-        name: 'T(r)', line: { color: 'orange' }
-      }];
+                    tempTraces.push({
+                        x: [planet.a],
+                        y: [Ts],
+                        mode: 'markers',
+                        marker: { color: 'red', size: 7, symbol: 'circle' },
+                        name: 'Ts (Surface)',
+                        showlegend: !AddedTsLegend,
+                        hovertemplate: `Planet: ${planet_name}<br>Ts: %{y:.0f} K<extra></extra>`});
+                    AddedTsLegend = true;}
+            
+                tempTraces.push({
+                    x: [planet.a],
+                    y: [To],
+                    mode: 'markers+text',
+                    marker: { color: 'white', symbol: 'x', size: 7 },
+                    name: 'To (Blackbody)',
+                    text: [planet_name],
+                    textposition: 'top center',
+                    textfont: { color: 'white', size: 10 },
+                    showlegend: !AddedToLegend,
+                    hovertemplate: `Planet: ${planet_name}<br>To: %{y:.0f} K<extra></extra>`});
+                AddedToLegend = true;}
+        
+	    // Configuraciones del Plot Perfil de Temperatura
+	    const x_min = star['R_star'] * R_sun;
+	    const x_max = r_max*1.5 ;
+            Plotly.newPlot('temperaturePlot', [...temperatureData, ...tempTraces],{
+                title: `Temperature profile: ${star_name} (T<sub>eff</sub> = ${star['T_eff']} K)`,
+                xaxis: { title: 'AU',range:[x_min, x_max]},
+                yaxis: { title:'log<sub>10</sub> Temperatura [K]',type:'log',range: [Math.log10(100), Math.log10(star['T_eff'])]},
+		margin: { l: 40, r: 30, b: 40, t: 60, pad: 2 },
+		autosize: false,
+		responsive: false,
+		paper_bgcolor: 'black',
+                plot_bgcolor: 'black',
+                font: { color: 'white' },
+		shapes: [{type: 'rect',xref:'x',yref:'paper',x0:r_min,x1:r_max,y0: 0,y1: 1,fillcolor: 'rgba(0,255,0,0.4)',line: { width: 0 }}],
+		legend:{font: { color: 'white' }}});}
 
-      for (const [pname, pdata] of Object.entries(star.planets)) {
-        const a = pdata.a;
-        const TeqTs = pdata.Albedo !== undefined && pdata.g !== undefined ? Teq_Ts(star.L_star, a, pdata.Albedo, pdata.g) : [null, null];
-        const Teq = TeqTs[0], Ts = TeqTs[1];
-        const To_val = To(star.L_star, a);
-        if (Teq && Ts) {
-          tempTraces.push({
-            x: [a, a], y: [Teq, Ts], mode: 'lines',
-            line: { color: 'blue', width: 2 },
-            type: 'scatter', name: `${pname} ΔT`
-          });
-          tempTraces.push({
-            x: [a], y: [Teq], mode: 'markers',
-            marker: { color: 'white', size: 6 }, name: `${pname} Teq`
-          });
-          tempTraces.push({
-            x: [a], y: [Ts], mode: 'markers',
-            marker: { color: 'red', size: 6 }, name: `${pname} Ts`
-          });
-        }
-        tempTraces.push({
-          x: [a], y: [To_val], mode: 'markers+text',
-          marker: { color: 'white', symbol: 'x' }, name: `${pname} To`,
-          text: [pname], textposition: 'top center', textfont: { color: 'white' }
-        });
-      }
+        document.getElementById('starSelector').addEventListener('change', function() {
+            plotSystem(this.value);});
+	let resizeDebounce;
+	window.addEventListener('resize', function() {
+    	    clearTimeout(resizeDebounce);
+            resizeDebounce = setTimeout(function() {
+        	const star = document.getElementById('starSelector').value;
 
-      Plotly.newPlot('tempPlot', tempTraces, {
-        title: `Temperature Profile: ${starName} (Teff = ${star.T_eff} K)`,
-        paper_bgcolor: 'black', plot_bgcolor: 'black',
-        xaxis: { title: 'AU', color: 'white' },
-        yaxis: { title: 'Temperature (K)', type: 'log', color: 'white' },
-        legend: { font: { color: 'white' } }
-      });
-    }
+        // Redibuja completamente los gráficos
+        	Plotly.purge('orbitalPlot');
+        	Plotly.purge('temperaturePlot');
+        	plotSystem(star);}, 300);});
 
-    // Setup dropdown
-    const starSelect = document.getElementById("starSelect");
-    Object.keys(stars).forEach(name => {
-      const option = document.createElement("option");
-      option.value = name;
-      option.textContent = name;
-      starSelect.appendChild(option);
-    });
-    starSelect.onchange = () => plotSystem(starSelect.value);
-    plotSystem(starSelect.value = Object.keys(stars)[0]); // Initial plot
-  </script>
-
-  <p>El notebook interactivo de Python está disponible en nuestro repositorio de <a href="https://github.com/wbandabarragan/computational-physics/blob/main/fisica-interactiva/particula-cuantica.ipynb">GitHub</a>. Revísalo.</p>
-  <p>Autor: Terry Cevallos.</p>
-	<p>Elaborado por el Grupo de Física Computacional cPhys+ en la Universidad Yachay Tech, Ecuador.</p>
+        // Inicializar
+        plotSystem(document.getElementById('starSelector').value);
+    </script>
 </body>
 </html>
