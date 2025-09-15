@@ -1,56 +1,149 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">    
     <title>Sistema Estelar Interactivo</title>
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
 	/* PC configuration */
-        body { background: radial-gradient(ellipse at center, #18204d 50%, #5d2929 100%);;color: white;font-family: Arial, sans-serif;margin: 0;padding: 0;}
+        body { background: radial-gradient(ellipse at center, #18204d 50%, #5d2929 100%);color: white;font-family: Arial, sans-serif;margin: 0;padding: 0;}
         .header {display: flex;text-align: center;justify-content: center;flex-direction: column;align-items:center;gap: 20px;
-	    margin-bottom: 20px;width: 100%;max-width: 100%;padding: 20px 0;position: relative;}
-	    .custom-label {font-family: 'Space Mono', monospace;font-size: 1.1rem;color: #6bd6ff;margin-bottom: 8px;display: block;}
+	margin-bottom: 20px;width: 100%;max-width: 100%;padding: 20px 0;position: relative;}
+	.custom-label {font-family: 'Space Mono', monospace;font-size: 1.1rem;color: #6bd6ff;margin-bottom: 8px;display: block;}
         .logo {margin-top: 5px;margin-bottom: 5px;max-height: 80px;width: auto;object-fit: contain;transform: none;}
         h1 {transform: none;font-weight: 700;margin: 0;color: #4fc3f7;font-family: 'Space Mono', monospace;font-size: 3rem;}
         .container {padding: 15px;max-width: 100%;box-sizing: border-box;}
         .dropdown-container {margin-bottom: 20px;text-align: center;}
         select {padding: 10px 15px;background-color: #0a192f;color: #4fc3f7;border: 2px solid #4fc3f7;border-radius: 6px;width: 300px;
         max-width: 100%;font-family: 'Space Mono', monospace;font-size: 1rem;cursor: pointer;}
-	    .main-plots {display: flex;flex-direction: column;gap: 40px;width: 100%;max-width: 1200px;margin: 0 auto;}
-        .plot-container {transform: translateX(40px);width: 100%;max-width: 800px;height: 500px;margin: 20px auto;position: relative;overflow: hidden;}
-        .abstract{max-width: 1000px;margin: 10px auto 20px auto;padding: 15px 25px;text-align: justify;font-family: 'Space Mono', monospace;font-size: 0.9rem;
-        line-height: 1.6;color: #e0e0e0;word-break: break-word;overflow-wrap: break-word;box-sizing: border-box;}
-	    .credits-content {font-family: 'Space Mono', monospace;font-size: 0.6rem;color: rgba(255, 255, 255, 0.6);line-height: 1.6;letter-spacing: 0.5px;}
-        .definitions {text-align: left;margin-left:250px;margin-top: -115px;padding: 10px 25px;font-family: 'Space Mono', monospace;color: #e0e0e0;font-size: 0.75rem}
+	    /*.main-plots {padding-right:0; display: flex;flex-direction: column;gap: 40px;width: 100%;max-width: 1400px;margin: 0 auto; align-items: flex-end;}*/
+        /*.plot-row { display: flex; justify-content: space-between; gap: 120px; flex-direction: row;align-items: center;}*/
+	.plot-row { display: flex; justify-content: space-between; gap: 120px; flex-wrap: nowrap;}
+        .stellar-info {flex: 1;min-width: 250px;top: 20px;}
+        .plot-container {flex: 2;border-radius: 10px;align-items: center;min-width: 0; height: 500px;justify-content: center;
+  	align-items: center;display: flex;margin: 0 auto;position: relative; /*box-shadow: 0 2px 5px rgba(255, 255, 255, 0.999);*/}
+        /*.abstract{max-width: 1000px;margin: 10px auto 20px auto;padding: 15px 25px;text-align: justify;font-family: 'Space Mono', monospace;font-size: 0.9rem;
+        line-height: 1.6;color: #e0e0e0;word-break: break-word;overflow-wrap: break-word;box-sizing: border-box;}*/
+	.credits-content {font-family: 'Space Mono', monospace;font-size: 0.6rem;color: rgb(254, 254, 254);line-height: 1.6;letter-spacing: 0.5px;}
+        /*.definitions {text-align: left;margin-left:250px;margin-top: -115px;padding: 10px 25px;font-family: 'Space Mono', monospace;color: #e0e0e0;font-size: 0.75rem}*/
+        .stellar-card {display: flex;flex-direction: column;align-items: center;justify-content: center; text-align: center; height: 100%;width: 100%;max-width: 600px;margin: 0 auto;padding: 0 30px 0 80px;font-family: 'Space Mono', monospace;}
+        /*.stellar-details {display: flex;flex-direction: column;gap: 3px;margin: 30px 0 0 290px;}*/
+        /*.stellar-data {display: flex;flex-direction: column;gap: 3px;margin: 30px 0 0 290px;}*/          
+        .stellar-img {width: 450px;height: 130px;display: block;margin: 0 auto;object-fit: cover;transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;}
+
+        /*Configuraciones Definiciones Hz + Exoplanetas*/
+        .info-container {box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);border-radius: 10px;display: flex;align-items: center;text-align: justify;border-radius: 8px;padding: 15px;flex: 1;min-width: 300px;max-width: 500px;}
+        .info-img {width: 100px;height: 100px;object-fit: cover;border-radius: 6px;margin-right: 15px;}
+        .info-definition h3 {margin-top: 0;color: #4fc3f7;font-family: 'Space Mono', monospace;border-bottom: 1px solid rgba(79, 195, 247, 0.3);}
+        .info-definition p {color: #ffffff;line-height: 1.5;font-family: 'Space Mono', monospace;}
+    
+        /*Configuraciones para texto Conceptos*/
+        .definitions-container {border-radius: 10px;padding: 20px;margin: 0 auto;width: 90%;max-width: 1200px;box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);}
+        .definitions-container h3 {color: #4fc3f7;font-family: 'Space Mono', monospace;margin-top: 0;margin-bottom: 15px;border-bottom: 1px solid rgba(79, 195, 247, 0.3);padding-bottom: 8px;}
+        .definitions-container ul {padding-left: 20px;margin: 0;}
+        .definitions-container li {color: #e0e0e0;font-family: 'Space Mono', monospace;line-height: 1.6;margin-bottom: 10px;list-style-type: none;position: relative;}
+        .definitions-container li:before {content: "•";color: #6bd6ff;font-size: 1.2rem;position: absolute;left: -20px;top: -2px;}
+        .definitions-container strong {color: #6bd6ff;}
+
+
+	.language-selector {position: absolute;top: 20px;right: 45px;z-index: 1000;}
+
+	.language-selector select {padding: 6px 25px 6px 10px; background-color: transparent;color: #4fc3f7;border: none;font-family: 'Space Mono', monospace;
+	    font-size: 1rem;cursor: pointer;appearance: none; -webkit-appearance: none; -moz-appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234fc3f7'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+	    background-repeat: no-repeat; background-position: right 5px center; background-size: 16px; width: auto;}
+	.language-selector select:focus {background-color: transparent;outline: none;}
+	.language-selector select option {align-items: left;background-color: transparent;color: #4fc3f7;}	
 
 	/*Movile configuration*/
-        @media (max-width: 760px) {.header {flex-direction: column;align-items: center;}
-        .abstract {font-size: 10px;line-height: 1.2;padding: 5px 10px;margin: 0 auto;max-width: 95%;white-space: normal;}
-	    .plot-container {height: 300px;padding: 10px;text-align: center; width: 100%;margin: 10px auto;max-width: 100%;}
-        .main-plots {gap: 20px;}
-  	    .credits-content {padding: 8px 16px;font-size: 0.6rem;}
-    	.js-plotly-plot {width: 100% height: 100% }
-    	.logo {margin: 0 auto;max-height: 50px;}
-    	h1 {white-space: normal;font-size: 1.8rem;width: 90%;padding: 0 10px;max-width: 100%;margin: 0 auto;text-align: center;}
-    	select {padding: 8px 12px;font-size: 0.9rem;}}
-        .definitions { font-size: 10px;padding: 5px 10px;text-align: left}}
+    @media (max-width:980px) {
+        @media (orientation: portrait) {
+        .definitions-container h3, .definitions-container li {font-size: 0.5rem;}
+        .info-container { max-width: 50%; }
+        .info-definition h3 {font-size: 1rem;}
+        .info-definition p {font-size: 1rem;}}
+        @media (orientation: landscape) {
+        .definitions-container h3, .definitions-container li {
+            font-size: 0.7rem;}
+        .info-container {max-width: 50%;flex-direction: row;}
+        .info-definition h3 {font-size: 0.7rem;}
+        .info-definition p {font-size: 0.7rem;}
+        .info-img { margin-right: 15px; }}
+        
+            
+        .header {flex-direction: column;align-items: center;padding: 10px 0;}
+                
+        .abstract {font-size: 0.8rem;line-height: 1.4;padding: 10px 15px;margin: 0 auto 15px auto;max-width: 95%;}
+                
+        .plot-container {align-items: center;width: 100%;padding: 10px 0;height: auto;box-shadow: none;}
+                
+        .plot-row,.plot-row0 {flex-direction: column;gap: 30px;align-items: center;overflow-x: unset;padding: 0 10px;}
+        .stellar-card {padding: 10px;}
+        .stellar-img {width: 450px;height: 130px;}
+
+        .credits-content {padding: 8px 16px;font-size: 0.6rem;}           
+                
+        .logo {max-height: 50px;}
+                
+        h1 {font-size: 1.8rem;width: 95%;padding: 0;margin: 0 auto;}
+                
+        select {padding: 8px 12px;font-size: 0.9rem;width: 30%;max-width: 95%;}
+
+	.language-selector {top: 10px;right: 20px;}
+        
+	.language-selector select {padding: 5px 22px 5px 8px;font-size: 0.9rem;background-size: 10px;}}
+
+                
+        /*.definitions {font-size: 0.7rem;padding: 5px 15px;text-align: left;margin-left: 0;margin-top: 0;width: 95%;max-width: 95%;}*/
+           
 
     </style>
 </head>
 <body>
+    <div class="language-selector">
+        <select id="languageSelector">
+            <option value="es">es</option>
+            <option value="en">en</option>
+        </select>
+    </div>
     
      <div class="header">
-	    <img src="https://cPhysPlus.github.io/img/home-institution/client-6.png" class="logo" alt="Client Logo">
-	    <h1>Habitable Zones around Stellar Systems</h1>
-        <div class="abstract">
-        Physics applets can be used as an educational tool to encourage and strengthen the interest in astrophysics and exoplanet exploration. We develop a python-, javascript-, and HTML-based applet to model habitable zones around real stellar systems. We use the stellar radius, luminosity, surface temperature, greenhouse coefficients, and radiative flux to calculate the effective temperature around each star and estimate the size of the so-called Habitable Zone. Our interactive applet allows us to visualize the orbits of exoplanets and regions around their stars where liquid water can exist (i.e., the Habitable Zones). In addition, our applet includes a temperature profile, which represents how the temperature varies as a function of the distance to the star.
+	    <img src='imagenes/cphys.jpg' class="logo">
+	    <h1 id="mainTitle">Zonas Habitables Alrededor de Sistemas Estelares</h1>
+        <div class="plot-row">
+            <div class="info-container">
+                <img src='imagenes/HZ.png' alt="Concepto zona habitable" class="info-img">
+                <div class="info-definition">
+                    <h3 id="hzTitle">Zona Habitable</h3>
+                    <p id="hzText">Región alrededor de una estrella donde las condiciones podrían permitir la existencia de agua líquida en la superficie de un planeta. Ademas, estas zonas se consideran potencialmente aptas para albergar vida.</p>
+                </div>
+            </div>
+            <div class="info-container">
+                <img src='imagenes/exoplanet.jpg' alt="Tipos de zonas habitables" class="info-img">
+                <div class="info-definition">
+                    <h3 id="exoplanetTitle">Exoplanetas</h3>
+                    <p id="exoplanetText">Planeta que orbita una estrella distinta al Sol, localizado fuera del sistema solar. Actualmente se han confirmado más de 5.800 exoplanetas.</p>
+                </div>
+            </div>
         </div>
-     </div>
-     <div class="container">            
+    </div>
+        
+    <div class="definitions-container">
+        <h3 id="conceptsTitle"><i class="fas fa-book-open"></i> Conceptos</h3>
+            <ul id="conceptsList">
+                <li><strong>Temperatura efectiva (T<sub>eff</sub>):</strong> Temperatura media teórica de la superficie de una estrella.</li>
+                <li><strong>Temperatura equilibrio (T<sub>eq</sub>):</strong> Temperatura teórica de un planeta como cuerpo negro, calculada solo con la radiación que recibe de su estrella y su albedo.</li>
+                <li><strong>Temperatura superficial (T<sub>s</sub>):</strong> Temperatura real medida en la superficie de un planeta, influenciada por factores atmosféricos y el efecto invernadero.</li>
+                <li><strong>Temperatura Cuerpo Negro (T<sub>o</sub>):</strong> Temperatura de un objeto ideal que absorbe toda la radiación electromagnética que incide sobre él y emite únicamente radiación térmica.</li>
+            </ul>
+    </div>
+    
+       
+    <div class="container">            
         <div class="dropdown-container">
-            <label for="starSelector" class="custom-label">Select a star system:</label>
+            <label for="starSelector" class="custom-label" id="starSelectorLabel">Seleccione un sistema estelar:</label>
             <select id="starSelector">
-                <option value="Sun">Sun</option>
+                <option value="Sol">Sol</option>
                 <option value="HD 40307">HD 40307</option>
                 <option value="Proxima Centauri">Proxima Centauri</option>
                 <option value="Kepler-186">Kepler-186</option>
@@ -60,24 +153,31 @@
                 <option value="51 Peg">51 Peg</option>
             </select>
         </div>
-        <div class="main-plots">
-	     <div class="plot-container" id="orbitalPlot"></div>
-    	     <div class="plot-container" id="temperaturePlot"></div>
-         <div class="abstract definitions">    
-            <ul>
-                <li><strong>T<sub>eff</sub></strong>: Theoretical average surface temperature of a Star.</li>
-                <li><strong>T<sub>eq</sub></strong>: Temperature of a planet in radiative equilibrium (no atmosphere).</li>
-                <li><strong>T<sub>s</sub></strong>: Real temperature measured at the planet's surface (with greenhouse effect).</li>
-                <li><strong>T<sub>o</sub></strong>: Temperature considering a perfect black body.</li>
-            </ul>
-</div>
-	<div class="credits-content">
-    <p>EL NOTEBOOK INTERACTIVO DE PYTHON ESTA DISPONIBLE EN NUESTRO REPOSITORIO DE <a href="https://github.com/wbandabarragan/computational-physics/blob/main/fisica-interactiva/particula-cuantica.ipynb" target="_blank">GITHUB</a>. REVISALO.</p>
-	<p>AUTOR: TERRY CEVALLOS.</p>
-	<P>ELABORADO POR EL GRUPO DE FISICA COMPUTACIONAL cPhys+ EN LA UNIVERSIDAD YACHAY TECH, ECUADOR.</P>
-        </div>
-	</div>     
     </div>
+    <div class="plot-column">
+        <div class="stellar-info">
+            <div class="stellar-card">
+                <img id="stellarTypeImage" src='imagenes/estrellas/tipo_G.png' class="stellar-img">
+                <div class="stellar-details">
+                    <h3 id="starName">Sol</h3>
+                    <p id="starType"> <strong>Tipo Espectral:</strong> <span class="star-type-G">G</span></p>
+                    <div class="stellar-data">
+                        <p><strong>T<sub>eff</sub>:</strong> <span id="starTemp">5000∼6000</span> K</p>
+                    </div>
+                </div>
+            </div>
+        </div>        
+        <div class="plot-container" id="orbitalPlot"></div>
+	</div>   
+        <div class="plot-container" id="temperaturePlot"></div>
+    </div>
+   
+	<div class="credits-content">
+        <p id="githubText">El notebook interactivo de phyton esta disponible en nuestro repositorio de <a href="https://github.com/wbandabarragan/computational-physics/blob/main/fisica-interactiva/particula-cuantica.ipynb" target="_blank">GitHub</a>. Revisalo.</p>
+	<p id="contactText">Contáctanos: terry.cevallos@yachaytech.edu.ec, wbanda@yachaytech.edu.ec</p>
+	<p id="authorText">Autor: Terry P. Cevallos Rios.</p>
+	<p id="creditsText">Elaborado por el grupo de física computacional cPhys+ en la universidad Yachay Tech, Ecuador.</p>
+	</div>     
     <script>
 
 	// Constantes Astronomicas
@@ -86,22 +186,81 @@
         const UA = 1.496e11;
         const R_sun = 0.00465;
 
+	//Diccionario traduccion
+	const translations = {
+		es: {mainTitle: 'Zonas Habitables Alrededor de Sistemas Estelares',
+                     hzTitle: 'Zona Habitable',
+                     hzText: 'Región alrededor de una estrella donde las condiciones podrían permitir la existencia de agua líquida en la superficie de un planeta. Ademas, estas zonas se consideran potencialmente aptas para albergar vida.',
+                     exoplanetTitle: 'Exoplanetas',
+                     exoplanetText: 'Planeta que orbita una estrella distinta al Sol, localizado fuera del sistema solar. Actualmente se han confirmado más de 5.800 exoplanetas.',
+                     conceptsTitle: 'Conceptos',
+                     conceptsList: [
+			     	'<strong>Temperatura efectiva (T<sub>eff</sub>):</strong> Temperatura media teórica de la superficie de una estrella.',
+                    		'<strong>Temperatura equilibrio (T<sub>eq</sub>):</strong> Temperatura teórica de un planeta como cuerpo negro, calculada solo con la radiación que recibe de su estrella y su albedo.',
+                    		'<strong>Temperatura superficial (T<sub>s</sub>):</strong> Temperatura real medida en la superficie de un planeta, influenciada por factores atmosféricos y el efecto invernadero.',
+                    		'<strong>Temperatura Cuerpo Negro (T<sub>o</sub>):</strong> Temperatura de un objeto ideal que absorbe toda la radiación electromagnética que incide sobre él y emite únicamente radiación térmica.'],
+		     starSelectorLabel: 'Seleccione un sistema estelar:',
+                     githubText: 'El notebook interactivo de phyton esta disponible en nuestro repositorio de <a href="https://github.com/wbandabarragan/computational-physics/blob/main/fisica-interactiva/particula-cuantica.ipynb" target="_blank">GitHub</a>. Revisalo.',
+		     contactText: 'Contáctanos: terry.cevallos@yachaytech.edu.ec, wbanda@yachaytech.edu.ec.',
+		     authorText: 'Autor: Terry P. Cevallos Rios.',
+                     creditsText: 'Elaborado por el grupo de física computacional cPhys+ en la universidad Yachay Tech, Ecuador.',
+		     spectralType: 'Tipo Espectral:',
+                     habitableZone: 'Zona Habitable',
+                     temperatureProfile: 'Perfil de Temperatura',
+                     systemTitle: 'Sistema Estelar',
+		     starNames : {'Sol': 'Sol'},
+		     planetNames: {	                    
+	                    'Tierra': 'Tierra',
+	                    'Mercurio': 'Mercurio',
+	                    'Venus': 'Venus',
+	                    'Marte': 'Marte'}},
+		
+		en: {mainTitle: 'Habitable Zones Around Stellar Systems',
+	 	     hzTitle: 'Habitable Zone',
+	             hzText: 'Region around a star where conditions could allow the existence of liquid water on the surface of a planet. These zones are considered potentially suitable for harboring life.',
+	             exoplanetTitle: 'Exoplanets',
+	             exoplanetText: 'Planet that orbits a star other than the Sun, located outside our solar system. Currently, more than 5,800 exoplanets have been confirmed.',
+	             conceptsTitle: 'Concepts',
+		     conceptsList: [
+                    		"<strong>Effective temperature (T<sub>eff</sub>):</strong> Theoretical mean temperature of a star's surface.",
+                    		'<strong>Equilibrium temperature (T<sub>eq</sub>):</strong> Theoretical temperature of a planet as a black body, calculated only with the radiation it receives from its star and its albedo.',
+                    		"<strong>Surface temperature (T<sub>s</sub>):</strong> Actual temperature measured on the surface of a planet, influenced by atmospheric factors and the greenhouse effect.",
+                    		'<strong>Black Body Temperature (T<sub>o</sub>):</strong> Temperature of an ideal object that absorbs all electromagnetic radiation incident upon it and emits only thermal radiation.'],
+		     starSelectorLabel: "Select a stellar system:",
+                     githubText: 'The interactive Python notebook is available in our <a href="https://github.com/wbandabarragan/computational-physics/blob/main/fisica-interactiva/particula-cuantica.ipynb" target="_blank">GitHub</a> repository. Check it out.',
+		     contactText: 'Contact Us: terry.cevallos@yachaytech.edu.ec, wbanda@yachaytech.edu.ec.',
+                     authorText: 'Author: Terry P. Cevallos Rios.',
+                     creditsText: 'Developed by the computational physics group cPhys+ at Yachay Tech University, Ecuador.',
+                     spectralType: 'Spectral Type:',
+                     habitableZone: 'Habitable Zone',
+                     temperatureProfile: 'Temperature Profile',
+                     systemTitle: 'Stellar System',
+		     starNames : {'Sol': 'Sun'},
+		     planetNames: {
+	                    'Sol': 'Sun',
+	                    'Tierra': 'Earth',
+	                    'Mercurio': 'Mercury',
+	                    'Venus': 'Venus',
+	                    'Marte': 'Mars'}}};	
+
 	// Diccionario estelar
         const stars_data = {
-            'Sun': {
+            'Sol': {
+                'T_media':'5000∼6000',
                 'T_eff': 5778,
                 'T_type': 'G',
                 'R_star': 1,
                 'L_star': 1,
                 'color': 'yellow',
                 'planets': {
-                    'Earth': {'a': 1.0, 'e': 0.017, 'color': 'blue', 'Albedo': 0.294, 'g': 0.384},
-                    'Mercury': {'a': 0.387, 'e': 0.2056, 'color': 'orange', 'Albedo': 0.068, 'g': 0},
+                    'Tierra': {'a': 1.0, 'e': 0.017, 'color': 'blue', 'Albedo': 0.294, 'g': 0.384},
+                    'Mercurio': {'a': 0.387, 'e': 0.2056, 'color': 'orange', 'Albedo': 0.068, 'g': 0},
                     'Venus': {'a': 0.723, 'e': 0.0068, 'color': 'red', 'Albedo': 0.77, 'g': 0.991},
-                    'Marth': {'a': 1.524, 'e': 0.093, 'color': 'coral', 'Albedo': 0.25, 'g': 0.085}
+                    'Marte': {'a': 1.524, 'e': 0.093, 'color': 'coral', 'Albedo': 0.25, 'g': 0.085}
                 }
             },
             'HD 40307': {
+                'T_media':'3900∼5200',
                 'R_star': 0.71668,
                 'T_eff': 4805,
                 'T_type': 'K',
@@ -116,6 +275,7 @@
                 }
             },
             'Proxima Centauri': {
+                'T_media':'2500∼3700',
                 'R_star': 0.154,
                 'T_eff': 3042,
                 'T_type': 'M',
@@ -126,6 +286,7 @@
                 }
             },
             'Kepler-186': {
+                'T_media':'2500∼3700',
                 'R_star': 0.5478,
                 'T_eff': 3881,
                 'T_type': 'M',
@@ -140,6 +301,7 @@
                 }
             },
             'Kepler-90': {
+                'T_media':'5000∼6000',
                 'R_star': 1.2,
                 'T_eff': 6080,
                 'T_type': 'G',
@@ -157,6 +319,7 @@
                 }
             },
             'K2-18': {
+                'T_media':'2500∼3700',
                 'R_star': 0.4445,
                 'T_eff': 3457,
                 'T_type': 'M',
@@ -168,6 +331,7 @@
                 }
             },
             'Trappist-1': {
+                'T_media':'2500∼3700',
                 'R_star': 0.1192,
                 'T_eff': 2566,
                 'T_type': 'M',
@@ -184,6 +348,7 @@
                 }
             },
             '51 Peg': {
+                'T_media':'5000∼6000',
                 'R_star': 1.1867,
                 'T_eff': 5773,
                 'T_type': 'G',
@@ -194,6 +359,40 @@
                 }
             }
         };
+        // Diccionario imagenes de estrellas segun su tipo de espectro
+        const stellarImages = {
+	    'G': 'imagenes/estrellas/tipo_G.png',
+	    'K': 'imagenes/estrellas/tipo_K.png',
+	    'M': 'imagenes/estrellas/tipo_M.png'};
+
+	// Funcion para actualizar lenguaje
+	let currentLanguage = 'es';
+	function updateLanguage(lang) {
+            currentLanguage = lang;
+            const t = translations[lang];
+	    const starSelector = document.getElementById('starSelector');
+    		Array.from(starSelector.options).forEach(option => {
+        	option.text = t.starNames[option.value] || option.value;});   
+
+	    // Actualizar Titulos y conceptos
+            document.getElementById('mainTitle').textContent = t.mainTitle;
+            document.getElementById('hzTitle').textContent = t.hzTitle;
+            document.getElementById('hzText').textContent = t.hzText;
+            document.getElementById('exoplanetTitle').textContent = t.exoplanetTitle;
+            document.getElementById('exoplanetText').textContent = t.exoplanetText;
+            document.getElementById('conceptsTitle').textContent = t.conceptsTitle;
+            document.getElementById('starSelectorLabel').textContent = t.starSelectorLabel;
+            document.getElementById('githubText').innerHTML = t.githubText;
+            document.getElementById('authorText').textContent = t.authorText;
+            document.getElementById('creditsText').textContent = t.creditsText;
+            
+            // Actualizar lista de conceptos
+            const conceptsList = document.getElementById('conceptsList');
+            conceptsList.innerHTML = '';
+            t.conceptsList.forEach(item => { const li = document.createElement('li');li.innerHTML = item;conceptsList.appendChild(li);});
+            
+            // Actualiza los textos del selector
+            const star = document.getElementById('starSelector').value;plotSystem(star);}
 
 	// Permite calcular las orbitas de los planetas
         function calculate_orbit(a, e) {
@@ -212,14 +411,21 @@
             const r_max = Math.sqrt(L_star / Seff_max);
             return {r_min, r_max};}
 
-	// Permite calcular las orbitas de los planetas
-        function temperature_profile(L_star, R_star) {
-            const R_star_UA = R_star * R_sun;
-            const r_UA = Array.from({length: 10000}, (_, i) => R_star_UA + i * (9 - R_star_UA) / 10000);
-            const r_m = r_UA.map(r => r * UA);
-            const T_r = r_m.map(r => Math.pow(L_star * L_sun / (16 * Math.PI * sigma * r**2), 0.25));
-            return {r_UA, T_r};}
-
+	// Permite calcular las orbitas de los planetas(pos)
+       function temperature_profile_pos(L_star, R_star) {
+	    const R_star_UA = R_star * R_sun;
+	    const r_UA = Array.from({length: 10000}, (_, i) => R_star_UA + i * (9 - R_star_UA) / 10000);
+	    const r_m = r_UA.map(r => r * UA);
+	    const T_r = r_m.map(r => Math.pow(L_star * L_sun / (16 * Math.PI * sigma * r**2), 0.25));
+	    return { r_UA_pos: r_UA, T_r_pos: T_r };}
+	    
+	// Permite calcular las orbitas de los planetas(neg)
+	function temperature_profile_neg(L_star, R_star) {
+	    const { r_UA_pos, T_r_pos } = temperature_profile_pos(L_star, R_star);	    
+	    const r_UA_neg = r_UA_pos.map(r => -r); 
+	    const T_r_neg = [...T_r_pos];
+	    return { r_UA_neg, T_r_neg };}
+	    
 	// Permite calcular la temperaturas To , Teq y Ts de los planetas
 	function planet_temperatures(L_star, planet) {
 	  const a = planet.a; 
@@ -236,11 +442,32 @@
 		  Ts = Teq * Math.pow(1 / (1 - g), 0.25);}}
 	  return {To, Teq, Ts};}
 
+	// Funcion para obtener posiciones aleatorias
+	function random_orbit(a, e){
+	    const orbit = calculate_orbit(a, e);
+            const randomIndex = Math.floor(Math.random() * orbit.x.length);
+            const x = orbit.x[randomIndex];
+            const y = orbit.y[randomIndex];
+            const x_negative = x < 0; 
+            return { x, y, x_negative };}
+		
 	// Funcion principal permite graficar orbitas, HZ y perfil de temperatura de una estrella
         function plotSystem(star_name) {
             const star = stars_data[star_name];
+	    const t = translations[currentLanguage];
+	    const translatedStarName = t.starNames[star_name] || star_name;
+            // Actualizar imagen 
+            const imgElement = document.getElementById('stellarTypeImage');
+            imgElement.src = stellarImages[star.T_type];
+            imgElement.alt = `Imagen de ${star_name}`;
+            // Ingresa al diccionario y actualiza los datos
+            document.getElementById('starName').textContent = translatedStarName;
+            document.getElementById('starType').innerHTML = `<strong>${t.spectralType}</strong> <span class="star-type-${star.T_type}">${star.T_type}</span>`;
+            document.getElementById('starTemp').textContent = star.T_media || `~${star.T_eff} K`;
+
             const {r_min, r_max} = habitable_zone_borders(star['L_star'], star['T_eff']);
-            const {r_UA, T_r} = temperature_profile(star['L_star'], star['R_star']);
+            const { r_UA_pos, T_r_pos } = temperature_profile_pos(star.L_star, star.R_star);
+	    const { r_UA_neg, T_r_neg } = temperature_profile_neg(star.L_star, star.R_star);
 	    const farthest_planet = Math.max(...Object.values(star.planets).map(p => p.a));
             const viewRange = Math.max(r_max * 1.5, farthest_planet * 1.2);
 		
@@ -261,7 +488,7 @@
                 y: [0],
 		mode: 'markers',
                 marker: { color: star['color'], size: 15 },
-                name: star_name}];
+                name: translatedStarName}];
 
 
             // Grafico HZ
@@ -287,7 +514,7 @@
     		line: { width: 1,color: 'green' },
     		type: 'scatter',
     		mode: 'lines',
-    		name: 'Habitable zone',
+    		name: t.habitableZone,
     		hoverinfo: 'none',
 		layer: 'below',
     		showlegend: true});
@@ -303,29 +530,42 @@
     		//hoverinfo: 'none'
 		//});
 
-	   // Planetas
-           for (const [planet_name, planet] of Object.entries(star.planets)) {const orbit = calculate_orbit(planet.a, planet.e);
-    
-    // 1. Línea de la órbita (visible en leyenda)
-    orbitalData.push({x: orbit.x,y: orbit.y,mode: 'lines',line: {color: planet.color,width: 1.5,opacity: 0.4},name: planet_name,hoverinfo: 'none'});
-
-    // 2. Planeta (posición aleatoria inicial, oculto en leyenda)
-    const randomIndex = Math.floor(Math.random() * orbit.x.length);
-    orbitalData.push({x: [orbit.x[randomIndex]],
-	y: [orbit.y[randomIndex]],
-        mode: 'markers',
-        marker: {color: planet.color,size: 6,symbol: 'circle',
-            line: {color: 'white',width: 1}},
-        name: planet_name,  
-        showlegend: false,  
-        hovertemplate: `
-            <b>${planet_name}</b><br>
-            Distance: ${planet.a} AU<br>
-            Eccentricity: ${planet.e}`});}
-
-	    // Configuraciones del plot de HZ
+	   // Genero posiciones aleatorias
+	   const planet_random_positions = {};
+	   for (const [planet_name, planet] of Object.entries(star.planets)) {    
+    		planet_random_positions[planet_name] = random_orbit(planet.a, planet.e);}
+		
+	   // Planetas	    
+           for (const [planet_name, planet] of Object.entries(star.planets)) {
+		const orbit = calculate_orbit(planet.a, planet.e);
+		const { x, y } = planet_random_positions[planet_name];
+		const translatedPlanetName = t.planetNames[planet_name] || planet_name;    
+    	   // Línea de la órbita (visible en leyenda)
+    		
+                orbitalData.push({
+                    x: orbit.x,
+                    y: orbit.y,
+                    mode: 'lines',
+                    line: {color: planet.color, width: 1.5, opacity: 0.4},
+                    name: translatedPlanetName,
+                    hoverinfo: 'none'});
+    	   // Planeta (posición aleatoria inicial, oculto en leyenda)
+    		orbitalData.push({
+			x: [x],
+			y: [y],
+        		mode: 'markers',
+        		marker: {color: planet.color,size: 6,symbol: 'circle',
+            			line: {color: 'white',width: 1}},
+        		name: translatedPlanetName,  
+        		showlegend: false,  
+        		hovertemplate: `
+            			<b>${translatedPlanetName}</b><br>
+            			${currentLanguage === 'es' ? 'Distancia' : 'Distance'}: ${planet.a} AU<br>
+            			${currentLanguage === 'es' ? 'Excentricidad' : 'Eccentricity'}: ${planet.e}`});}
+	    
+	    // Configuraciones del plot de HZ	
 	    Plotly.newPlot('orbitalPlot', orbitalData, {
-            	title:`Stellar System: ${star_name}-${star['T_type']}`,
+            	title: `${t.systemTitle}: ${translatedStarName}-${star['T_type']}`,
             	xaxis: { title: 'AU', scaleanchor: 'y',color: 'white',range: [-viewRange, viewRange]},
             	yaxis: { title: 'AU',color: 'white',range: [-viewRange, viewRange]},
 		margin: { l: 30, r: 30, b: 40, t: 60, pad: 2 },
@@ -339,93 +579,106 @@
 
             // Gráfico de temperatura
 	    const temperatureData = [{
-   	    	x: r_UA,
-            	y: T_r,
-            	mode: 'lines',
-		line: { color: star['color'],width: 3,
-        	shape: 'spline' },
-            	name: 'T(r)'}];
+		x: r_UA_neg,
+	        y: T_r_neg,
+	        mode: 'lines',
+	        line: { color: star['color'], width: 3, shape: 'spline' },
+	        name: 'T(r) (Negativo)',
+	        showlegend: false},	  
+	       {x: r_UA_pos,
+	        y: T_r_pos,
+	        mode: 'lines',
+	        line: { color: star['color'], width: 3, shape: 'spline' },
+	        name: 'T(r)'}];
 	    const tempTraces = [];
 	    let AddedTeqLegend = false;
             let AddedTsLegend = false;
             let AddedToLegend = false;
 
 	    for (const [planet_name, planet] of Object.entries(star.planets)) {
+		const { x,x_negative } = planet_random_positions[planet_name];
+		const translatedPlanetName = t.planetNames[planet_name] || planet_name;
     	        const {To, Teq, Ts} = planet_temperatures(star['L_star'], planet);
-              	if (Teq !== null && Ts !== null) {
+		const planetDistance = x_negative ? -planet.a : planet.a;
+		if (Teq !== null && Ts !== null) {
                     tempTraces.push({
-                        x: [planet.a, planet.a],
+                        x: [ planetDistance,  planetDistance],
                         y: [Teq, Ts],
                         mode: 'lines',
                         line: { color: '#4fc3f7', width: 2 },
                         type: 'scatter',
                         name: 'ΔT (Teq → Ts)',
                         showlegend: !AddedTeqLegend,
-                        hovertemplate: `Planet: ${planet_name}<br>Distance: %{x:.2f} AU<br>Temperature: %{y:.0f} K<extra></extra>`});
-                
+                        hovertemplate:`${currentLanguage === 'es' ? 'Planeta' : 'Planet'}: ${translatedPlanetName}<br>${currentLanguage === 'es' ? 
+					'Distancia' : 'Distance'}: %{x:.2f} AU<br>${currentLanguage === 'es' ? 'Temperatura' : 'Temperature'}: %{y:.0f} K<extra></extra>` });
                     tempTraces.push({
-                        x: [planet.a],
+                        x: [ planetDistance],
                         y: [Teq],
                         mode: 'markers',
                         marker: { color: 'blue', size: 9, symbol: 'circle' },
-                        name: 'Teq (T.Equilibrium)',
+                        name: 'Teq',
                         showlegend: !AddedTeqLegend,
-                        hovertemplate: `<b>${planet_name}</b><br>Teq: %{y:.0f} K<br>`});
+                        hovertemplate: `<b>${translatedPlanetName}</b><br>Teq: %{y:.0f} K<br>`});
                     AddedTeqLegend = true;
 
                     tempTraces.push({
-                        x: [planet.a],
+                        x: [planetDistance],
                         y: [Ts],
                         mode: 'markers',
                         marker: { color: 'red', size: 9, symbol: 'circle' },
-                        name: 'Ts (T.Surface)',
+                        name: 'Ts',
                         showlegend: !AddedTsLegend,
-                        hovertemplate: `<b>${planet_name}</b><br>Ts: %{y:.0f} K<br>`});
+                        hovertemplate:`<b>${translatedPlanetName}</b><br>Ts: %{y:.0f} K<br>`});
                     AddedTsLegend = true;}
             
                 tempTraces.push({
-                    x: [planet.a],
+                    x: [planetDistance],
                     y: [To],
                     mode: 'markers+text',
                     marker: { color: 'white', symbol: 'x', size: 8 },
-                    name: 'To (T.Blackbody)',
-                    text: [planet_name],
+                    name: 'To',
+                    text: [translatedPlanetName],
                     textposition: 'top center',
-                    textfont: { color: 'white', size: 15 },
+                    textfont: { color: 'white', size: 12 },
                     showlegend: !AddedToLegend,
-                    hovertemplate: `<b>${planet_name}</b><br>To: %{y:.0f} K<br>`});
+                    hovertemplate: `<b>${translatedPlanetName}</b><br>To: %{y:.0f} K<br>`});
                 AddedToLegend = true;}
-        
+
+	   		      
 	    // Configuraciones del Plot Perfil de Temperatura
 	    const x_min = star['R_star'] * R_sun;
 	    const x_max = r_max*1.5 ;
             Plotly.newPlot('temperaturePlot', [...temperatureData, ...tempTraces],{
-                title: `Temperature Profile: ${star_name} (T.eff = ${star['T_eff']} K)`,
-                xaxis: { title: 'AU',range:[x_min, x_max]},
-                yaxis: { title:'log₁₀ Temperature K',type:'log',range: [Math.log10(100), Math.log10(star['T_eff'])]},
+                title: `${t.temperatureProfile}: ${translatedStarName} (T<sub>eff</sub> = ${star['T_eff']} K)`,
+                xaxis: { title: 'AU',range:[-x_max, x_max]},
+                yaxis: { title:currentLanguage === 'es' ? 'log₁₀ Temperatura K' : 'log₁₀ Temperature K',type:'log',range: [Math.log10(100), Math.log10(star['T_eff'])]},
 		margin: { l: 70, r: 30, b: 40, t: 60, pad: 2 },
 		autosize: false,
 		responsive: false,
 		paper_bgcolor: 'black',
                 plot_bgcolor: 'black',
                 font: { color: 'white' },
-		shapes: [{type: 'rect',xref:'x',yref:'paper',x0:r_min,x1:r_max,y0: 0,y1: 1,fillcolor: 'rgba(0,255,0,0.4)',line: { width: 0 }}],
+		shapes: [{type: 'rect',xref:'x',yref:'paper',x0:r_min,x1:r_max,y0: 0,y1: 1,fillcolor: 'rgba(0,255,0,0.4)',line: { width: 0 }},
+			{type: 'rect', xref: 'x', yref: 'paper', x0: -r_max, x1: -r_min, y0: 0, y1: 1, fillcolor: 'rgba(0,255,0,0.4)', line: {width: 0}}],
 		legend:{font: { color: 'white' }}});}
-
-        document.getElementById('starSelector').addEventListener('change', function() {
+	    
+	document.getElementById('starSelector').addEventListener('change', function() {
             plotSystem(this.value);});
+    	document.getElementById('languageSelector').addEventListener('change', function() {
+            updateLanguage(this.value);});
+	    
 	let resizeDebounce;
 	window.addEventListener('resize', function() {
     	    clearTimeout(resizeDebounce);
             resizeDebounce = setTimeout(function() {
         	const star = document.getElementById('starSelector').value;
-
-        // Redibuja completamente los gráficos
+        	// Redibuja completamente los gráficos
         	Plotly.purge('orbitalPlot');
         	Plotly.purge('temperaturePlot');
         	plotSystem(star);}, 300);});
 
         // Inicializar
+	updateLanguage('es');
         plotSystem(document.getElementById('starSelector').value);
     </script>
 </body>
