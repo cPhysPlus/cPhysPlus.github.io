@@ -1,0 +1,501 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Explorador Estelar - Diagrama H-R</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+       body {margin: 0; padding: 20px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; font-family: 'Space Mono', monospace; color: rgb(250, 250, 250);      
+            background-color: #0d043f;
+            background-image: 
+                radial-gradient(1px 1px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 40px 70px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 50px 160px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 80px 120px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 100px 10px, #ffffff, rgba(0,0,0,0)),              
+                radial-gradient(circle at center, #0a192f 0%, #272424 100%);            
+            background-repeat: repeat;
+            background-size: 200px 200px, 150px 150px, 300px 300px, 250px 250px, 100px 100px, 100% 100%;}
+        .header {display: flex;text-align: center;justify-content: center;flex-direction: column;align-items:center;gap: 20px;
+	    margin-bottom: 20px;width: 100%;max-width: 100%;padding: 20px 0;position: relative;}
+		.logo {margin-top: 5px;margin-bottom: 5px;max-height: 80px;width: auto;object-fit: contain;transform: none;}
+        h1 {transform: none;text-shadow: 0 0 10px rgba(79, 195, 247, 0.5);font-weight: 700;margin: 0;color: #4fc3f7;font-family: 'Space Mono', monospace;font-size: 3rem;}
+        .main-container {display: flex; flex-direction: column; align-items: center; gap: 20px; width: 100%; max-width: 1200px;}        
+        .info-card {width: 100%; max-width: 1200px; padding: 15px 25px; background: rgba(10, 25, 47, 0.9); border: 2px solid #4fc3f7; border-radius: 12px; box-shadow: 0 0 20px rgba(79, 195, 247, 0.2);
+            display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;}
+        #star-name { color: #4fc3f7; margin: 0; font-size: 1.4rem; min-width: 250px;}
+		.txt-sin-planetas {color: #ef9a9a;font-size: 0.7rem;margin-top: 10px;display: block;}
+        .details-row {display: flex; gap: 40px; align-items: center; flex-grow: 1; justify-content: center;}
+        .data-item { font-size: 1rem; }
+        .data-item span:first-child { color: #888; margin-right: 5px; }
+        .btn-habitable {background: #00c853; color: black; border: none; padding: 8px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-family: 'Space Mono', monospace;
+            text-transform: uppercase; transition: 0.3s; white-space: nowrap;}
+        .btn-habitable:hover { background: #b2ff59; box-shadow: 0 0 15px rgba(0, 200, 83, 0.4);}        
+        #hr-plot {width: 1100px; height: 550px;border-radius: 15px; box-shadow: 0 0 30px rgba(0,0,0,0.5);}
+        .star-viewer-box {display: flex;justify-content: center;align-items: center;height: 220px;background: rgba(0, 0, 0, 0.2);border-radius: 8px;margin: 10px 0;}
+        #star-img {max-height: 180px; width: auto; border-radius: 80%;  object-fit: contain;}
+        #initial-img {max-height: 180px; width: auto; object-fit: contain; filter:drop-shadow(0 0 20px #b3e5fc);}
+		.credits-content {font-family: 'Space Mono', monospace;font-size: 0.6rem;color: rgb(254, 254, 254);line-height: 1.6;letter-spacing: 0.5px;}
+        /*Configuracion botton lenguaje*/
+        .language-selector {position: absolute;top: 20px;right: 45px;z-index: 1000;}
+    	.language-selector select {padding: 6px 25px 6px 10px; background-color: transparent;color: #4fc3f7;border: none;font-family: 'Space Mono', monospace;
+    	    font-size: 1rem;cursor: pointer;appearance: none; -webkit-appearance: none; -moz-appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234fc3f7'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    	    background-repeat: no-repeat; background-position: right 5px center; background-size: 16px; width: auto;}
+    	.language-selector select:focus {background-color: transparent;outline: none;}
+    	.language-selector select option {align-items: left;background-color: transparent;color: #4fc3f7;}		 
+		/*Configuracion Movile*/
+		@media (max-width: 980px) {		    
+			.language-selector {top: 10px;right: 10px;}		        
+			.language-selector select {padding: 5px 22px 5px 8px;font-size: 0.9rem;background-size: 10px;}
+		    .main-container {display: flex; flex-direction: column; align-items: center;}    
+		    .header {text-align: center;}    
+		    h1 {font-size: 1.8rem;width: 95%;padding: 0;margin: 0 auto;}		
+		    .main-container {gap: 15px; width: 100%;}
+			.logo {max-height: 50px;}
+		    .info-card { border-radius: 8px; background: rgba(10, 25, 47, 0.95);}		    
+		    #hr-plot {width: 100% !important;box-shadow: none;}}
+		
+		@media (max-width: 980px) and (orientation: portrait) {
+		    body {min-height: 70vh; height: auto; display: block; padding: 10px;}
+			  #star-name {text-align: center;}
+		    .main-container {margin-left:70px; gap: 15px; width: 100%;}		
+		    .header {text-align: center; margin-left: 70px;}		    
+		    .info-card {flex-direction: column; padding: 20px 15px;width: 95%;}		
+		    .details-row {flex-direction: column; gap: 12px;}		
+		    #hr-plot { height: 450px;}		
+		    .data-item {font-size: 0.9rem; }
+		    .credits-content {margin-top:110px;font-family: 'Space Mono', monospace;font-size: 0.6rem;color: rgb(254, 254, 254);line-height: 1.6;letter-spacing: 0.5px;}
+		}		
+	
+		@media (max-width: 980px) and (orientation: landscape) {
+		    body {height: auto; padding: 10px;}		
+		    .header {text-align: center;margin-left:150px}  
+		    .main-container {margin-left:160px; gap: 50px; width: 100%;}		   
+		    .details-row {display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%;}		
+		    .info-card {flex-direction: column; padding: 15px;}		
+		    #hr-plot {margin-top: 50px; height: 500px;}		
+		    .star-viewer-box { height: 140px;}
+		    .credits-content {margin-right:250px;margin-top:25px;font-family: 'Space Mono', monospace;font-size: 0.6rem;color: rgb(254, 254, 254);line-height: 1.6;letter-spacing: 0.5px;}
+		}
+    </style>
+	
+</head>
+<body>
+<div class="language-selector">
+    <select id="languageSelector">
+        <option value="es">es</option>
+        <option value="en">en</option>
+    </select>
+</div>
+
+<div class="header">
+	<img src='imagenes/cphys.jpg' class="logo">
+    <h1 id="main-title">Diagrama Hertzsprung-Russell</h1>
+</div>
+
+<div class="main-container">
+    <div id="info-panel" class="info-card">
+        <h2 id="star-name">Selecciona una estrella</h2>
+        
+       <div class="details-row">
+            <div class="data-item">
+                <span id="lbl-temp">T:</span> <span id="val-temp">-</span> K
+            </div>
+            <div class="data-item">
+                <span id="lbl-lum">L:</span> <span id="val-lum">-</span> L<sub>☉</sub>
+            </div>
+            <div class="data-item">
+                <span id="lbl-rad">Radio:</span> <span id="val-rad">-</span> R<sub>☉</sub>
+            </div>
+            <div class="data-item">
+                <span id="lbl-tipo">Espectro:</span> <span id="val-tipo">-</span>
+            </div>
+            <div class="data-item">
+                <span id="lbl-clase">Clase:</span> <span id="val-size">-</span>
+            </div>
+        </div>
+        <div id="action-container"></div>
+    	</div>
+        <div id="star-viewer" class="star-viewer-box">
+        <img id="star-img" src="" alt="Vista estelar" style="display: none;">
+        <img id="initial-img" src="Starsimage/initial.png">         
+        </div>
+    </div>
+        <div id="hr-plot"></div>
+    </div>
+	<div class="credits-content">
+    <p id="referenceText">Información obtenida de <a href="https://exoplanet.eu/home/" target="_blank">exoplanet.eu</a>,<a href="https://www.stellarcatalog.com/index_es.php" target="_blank">Stellar Catalog</a>, <a href="https://exoplanetarchive.ipac.caltech.edu/index.html" target="_blank">Exoplanet Archive</a>
+	<p id="contactText">Contáctanos: terry.cevallos@yachaytech.edu.ec, wbanda@yachaytech.edu.ec</p>
+	<p id="authorText">Autor: Terry P. Cevallos Rios.</p>
+	<p id="creditsText">Elaborado por el grupo de física computacional cPhys+ en la universidad Yachay Tech, Ecuador.</p>
+	</div>     
+    <script>		
+
+
+	//Diccionario Traductor
+	const translations = {
+    es: {
+        title: "Diagrama Hertzsprung-Russell",
+        placeholder: "Selecciona una estrella",
+        lblTemp: "T:",
+        lblLum: "L:",
+        lblRad: "Radio:",
+        lblTipo: "Espectro:",
+        lblClase: "Clase:",
+        btnExplore: "Explorar Sistema ➜",
+        noPlanets: "Sin exoplanetas",
+        plotX: "log₁₀ Temperatura Efectiva (K)",
+        plotY: "log₁₀ Luminosidad (L/L☉)",
+        referenceText: 'Información obtenida de <a href="https://exoplanet.eu/home/" target="_blank">exoplanet.eu</a>, <a href="https://www.stellarcatalog.com/index_es.php" target="_blank">Catalogo Estelar</a>, <a href="https://exoplanetarchive.ipac.caltech.edu/index.html" target="_blank">Archivo de exoplanetas</a>',
+        contactText: 'Contáctanos: terry.cevallos@yachaytech.edu.ec, wbanda@yachaytech.edu.ec.',
+        authorText: 'Autor: Terry P. Cevallos Rios.',
+        creditsText: 'Elaborado por el grupo de física computacional cPhys+ en la universidad Yachay Tech, Ecuador.',        
+        mainSequence: "Secuencia Principal",
+        redGiants: "Gigantes Rojas",
+        redSupergiants: "Supergigantes Rojas",
+        whiteDwarfs: "Enanas Blancas",
+        blueGiants: "Gigantes Azules",
+        blueSupergiants: "Supergigantes Azules",
+        starNames: {
+            'Sun': 'Sol',
+            'Pollux': 'Polúx',
+            "Barnard's Star": "Estrella de Barnard"
+        },
+        clases: {
+            'Supergigante Roja': 'Supergigante Roja',
+            'Supergigante Azul': 'Supergigante Azul',
+            'Gigante Azul': 'Gigante Azul',
+            'Gigante Roja': 'Gigante Roja',
+            'Secuencia Principal (O)': 'Secuencia Principal (O)',
+            'Secuencia Principal (B)': 'Secuencia Principal (B)',
+            'Secuencia Principal (A)': 'Secuencia Principal (A)',
+            'Secuencia Principal (F)': 'Secuencia Principal (F)',
+            'Secuencia Principal (G)': 'Secuencia Principal (G)',
+            'Secuencia Principal (K)': 'Secuencia Principal (K)',
+            'Secuencia Principal (M)': 'Secuencia Principal (M)',
+            'Enana Blanca (D)': 'Enana Blanca (D)'
+        }
+    },
+    en: {
+        title: "Hertzsprung-Russell Diagram",
+        placeholder: "Select a star",
+        lblTemp: "T:",
+        lblLum: "L:",
+        lblRad: "Radius:",
+        lblTipo: "Spectrum:",
+        lblClase: "Class:",
+        btnExplore: "Explore System ➜",
+        noPlanets: "No exoplanets",
+        plotX: "log₁₀ Effective Temperature (K)",
+        plotY: "log₁₀ Luminosity (L/L☉)",
+        referenceText: 'Information obtained from <a href="https://exoplanet.eu/home/" target="_blank">exoplanet.eu</a>,<a href="https://www.stellarcatalog.com/index_es.php" target="_blank">Stellar Catalog</a>, <a href="https://exoplanetarchive.ipac.caltech.edu/index.html" target="_blank">Exoplanet Archive</a>',
+        contactText: 'Contact Us: terry.cevallos@yachaytech.edu.ec, wbanda@yachaytech.edu.ec.',
+        authorText: 'Author: Terry P. Cevallos Rios.',
+        creditsText: 'Developed by the computational physics group cPhys+ at Yachay Tech University, Ecuador.',        
+        mainSequence: "Main Sequence",
+        redGiants: "Red Giants",
+        redSupergiants: "Red Supergiants",
+        whiteDwarfs: "White Dwarfs",
+        blueGiants: "Blue Giants",
+        blueSupergiants: "Blue Supergiants",
+        starNames: {
+            'Sun': 'Sun',
+            'Pollux': 'Pollux',
+            "Barnard's Star": "Barnard's Star"
+        },
+        clases: {
+            'Supergigante Roja': 'Red Supergiant',
+            'Supergigante Azul': 'Blue Supergiant',
+            'Gigante Azul': 'Blue Giant',
+            'Gigante Roja': 'Red Giant',
+            'Secuencia Principal (O)': 'Main Sequence (O)',
+            'Secuencia Principal (B)': 'Main Sequence (B)',
+            'Secuencia Principal (A)': 'Main Sequence (A)',
+            'Secuencia Principal (F)': 'Main Sequence (F)',
+            'Secuencia Principal (G)': 'Main Sequence (G)',
+            'Secuencia Principal (K)': 'Main Sequence (K)',
+            'Secuencia Principal (M)': 'Main Sequence (M)',
+            'Enana Blanca (D)': 'White Dwarf (D)'
+        }
+    }
+};
+         const estrellas = {
+   'Supergigantes Rojas': [
+        { nombre: 'VY Canis Majoris', temp: 3490, lum: 270000, radio: 1420, tipo: 'M5Iae C', color:'#fc0303', size: 'Supergigante Roja', hasPlanets: false },
+        { nombre: 'V915 Scorpii', temp: 3990, lum: 74000, radio: 571, tipo: 'K0Ia-0', color: '#fc0303', size: 'Supergigante Roja', hasPlanets: false },
+        { nombre: 'Betelgeuse', temp: 3700, lum: 100000, radio: 887, tipo: 'M1-M2 Ia', color: '#fc0303', size: 'Supergigante Roja', hasPlanets: false },
+        //{ nombre: 'Antares', temp: 3600, lum: 75900, radio: 680, tipo: 'M1.5Iab-Ib', color: '#ff3d00', size: 40, hasPlanets: false }
+    ],
+    'Supergigantes Azules': [
+        { nombre: 'Eta Carinae A', temp: 30000, lum: 4600000, radio: 240, tipo: 'LBV', color: '#2b86e0', size:'Supergigante Azul', hasPlanets: false },
+        { nombre: 'Zeta1 Scorpii', temp: 17200, lum: 850000, radio: 103, tipo: 'B1.5 Iae', color: '#3a9fc7', size:'Supergigante Azul', hasPlanets: false },
+        { nombre: 'Rigel A', temp: 12100, lum: 120000, radio: 78.9, tipo: 'B8 Iab', color: '#97e4f0', size:'Supergigante Azul', hasPlanets: false },
+    ],
+    'Gigantes Azules': [        
+        { nombre: 'Alnilam', temp: 27500, lum: 537000, radio: 32, tipo: 'B0 Iab', color: '#2b86e0', size:'Gigante Azul', hasPlanets: false },
+        { nombre: 'Alnitak', temp: 29500, lum: 250000, radio: 20, tipo: 'O9.7 Ib', color: '#2b86e0', size:'Gigante Azul', hasPlanets: false },
+        { nombre: 'Mintaka', temp: 29500, lum: 180000, radio: 18, tipo: 'O9.5 II', color: '#2b86e0', size:'Gigante Azul', hasPlanets: false }
+    ],
+    'Gigantes (Rojas y Naranjas)': [
+        { nombre: 'Arcturus', temp: 4286, lum: 170, radio: 25.4, tipo: 'K1.5 III', color: '#fc3503', size:'Gigante Roja', hasPlanets: false},
+        { nombre: 'Aldebaran', temp: 3910, lum: 518, radio: 44, tipo: 'K5 III', color: '#fc3503', size: 'Gigante Roja', hasPlanets: false},
+        { nombre: 'Pollux', temp: 4660, lum: 43, radio: 9.1, tipo: 'K0 IIIb', color: '#ff5252', size:'Gigante Roja', hasPlanets: true, systemID: 'Pollux' },
+        { nombre: 'Capella Ab', temp: 5730, lum: 72.7, radio: 8.83, tipo: 'K0 III', color: '#d6c52f', size:'Gigante Roja', hasPlanets: false }
+    ],
+    'Secuencia Principal (O, B, A)': [
+        { nombre: 'Theta¹ Orionis C', temp: 40000, lum: 250000, radio: 10.6, tipo: 'O6Vp', color: '#050180', size: 'Secuencia Principal (O)', hasPlanets: false },
+        { nombre: 'Tau Scorpii', temp: 31440, lum: 20400, radio: 6.5, tipo: 'B0.2V', color: '#2b86e0', size: 'Secuencia Principal (B)', hasPlanets: false },
+        { nombre: 'Zeta Ophiuchi', temp: 34000, lum: 68000, radio: 8.5, tipo: 'O9.5IV', color: '#0c5296', size:  'Secuencia Principal (O)', hasPlanets: false },
+        { nombre: 'Spica', temp: 22400, lum: 20500, radio: 7.4, tipo: 'B1III-IV', color: '#81d4fa', size:  'Secuencia Principal (B)', hasPlanets: false },
+        { nombre: 'Achernar A', temp: 15000, lum: 3493, radio: 6.7, tipo: 'B6Vep', color: '#b3e5fc', size: 'Secuencia Principal (B)', hasPlanets: false },
+        { nombre: 'Achernar B', temp: 9064, lum: 17.5, radio: 1.9, tipo: 'A1V', color: '#bfdee3', size: 'Secuencia Principal (A)', hasPlanets: false },
+        { nombre: 'Sirius A', temp: 9882, lum: 25.4, radio: 1.71, tipo: 'A1V', color: '#bfdee3', size:'Secuencia Principal (A)', hasPlanets: false },
+        { nombre: 'Vega', temp: 9830, lum: 40.12, radio: 2.36, tipo: 'A0Va', color: '#bfdee3', size:'Secuencia Principal (A)', hasPlanets: false },
+        { nombre: 'Fomalhaut', temp: 8590, lum: 16.6, radio: 1.84, tipo: 'A3Va', color: '#f5f5f5', size:'Secuencia Principal (A)', hasPlanets: false }
+    ],
+    'Secuencia Principal (F, G, K)': [
+        { nombre: 'Procyon A', temp: 6530, lum: 6.9, radio: 2.05, tipo: 'F5IV-V', color: '#e0d258', size:'Secuencia Principal (F)', hasPlanets: false },
+        { nombre: 'Sun', temp: 5778, lum: 1.0, radio: 1.0, tipo: 'G2V', color: '#d6c52f', size:'Secuencia Principal (G)', hasPlanets: true, systemID: 'Sol' },
+        { nombre: 'Kepler-90', temp: 6080, lum: 1.77, radio: 1.20, tipo: 'G0 V', color: '#d6c52f', size:'Secuencia Principal (G)', hasPlanets: true, systemID: 'Kepler-90'},
+        { nombre: '51 Pegasi', temp: 5758, lum: 1.36, radio: 1.176, tipo: 'G2IV B', color: '#d6c52f', size:'Secuencia Principal (G)', hasPlanets: true, systemID: '51 Pegasi' },
+        { nombre: 'HD 40307', temp: 4977, lum: 0.23, radio: 0.72, tipo: 'K2.5V C', color: '#fad6a0', size:'Secuencia Principal (K)', hasPlanets: 'HD 40307' },
+        { nombre: 'Epsilon Eridani', temp: 5116, lum: 0.34, radio: 0.895, tipo: 'K2V', color: '#fad6a0', size:'Secuencia Principal (K)', hasPlanets: true, systemID: 'Epsilon Eridani' },
+        { nombre: '61 Cygni A', temp: 4370, lum: 0.15, radio: 0.66, tipo: 'K5V', color: '#ffcc80', size:'Secuencia Principal (K)', hasPlanets: false }
+    ],
+    'Secuencia Principal (M)': [
+        { nombre: 'Proxima Centauri', temp: 3042, lum: 0.0017, radio: 0.15, tipo: 'M5.5Ve', color: '#ff5252', size: 'Secuencia Principal (M)', hasPlanets: true, systemID: 'Proxima Centauri' },
+        { nombre: 'Kepler-182', temp: 3755, lum: 0.055, radio: 0.52, tipo: 'M1V', color: '#ff5252', size:'Secuencia Principal (M)', hasPlanets: true, systemID: 'Kepler-182' },
+        { nombre: 'Barnard\'s Star', temp: 3134, lum: 0.0004, radio: 0.19, tipo: 'M4V', color: '#ff5252', size:'Secuencia Principal (M)', hasPlanets: true, systemID: 'Estrella de Barnard' },
+        { nombre: 'K2-18', temp: 3457, lum: 0.0251, radio: 0.41, tipo: 'M2.5 V', color: '#ff5252', size:'Secuencia Principal (M)', hasPlanets: true, systemID: 'K2-18' },
+        { nombre: 'GJ 357', temp: 3505, lum: 0.014, radio: 0.337, tipo: 'M2.5V', color: '#ff5252', size:'Secuencia Principal (M)', hasPlanets: true, systemID: 'GJ 357' },
+        { nombre: 'Trappist-1', temp: 2560, lum: 0.0005, radio: 0.117, tipo: 'M8V', color: '#ff1744', size:'Secuencia Principal (M)', hasPlanets: true, systemID: 'Trappist-1' }
+    ],
+    'Enanas Blancas': [
+        { nombre: 'Sirius B', temp: 26083, lum: 0.056, radio: 0.0084, tipo: 'DA2', color: '#e1f5fe', size:'Enana Blanca (D)', hasPlanets: false },
+        { nombre: '40 Eridani B', temp: 16400, lum: 0.013, radio: 0.0136, tipo: 'DA4', color: '#ffffff', size:'Enana Blanca (D)', hasPlanets: false },
+        { nombre: 'Procyon B', temp: 7740, lum: 0.00049, radio: 0.0123, tipo: 'DQZ', color: '#f5f5f5', size:'Enana Blanca (D)', hasPlanets: false },
+        { nombre: 'Van Maanen', temp: 6130, lum: 0.00017, radio: 0.011, tipo: 'DZ7', color: '#f5f5f5', size:'Enana Blanca (D)', hasPlanets: false },
+        { nombre: 'WD 0346+246', temp: 3780, lum: 0.00003981, radio: 0.01, tipo: 'DZ', color: '#ffebee', size:'Enana Blanca (D)', hasPlanets: false }
+    ]
+};
+		// Función para crear las anotaciones según el idioma
+		function getAnnotations(lang) {
+		    const t = translations[lang];    
+		    return [	        
+		        {
+		            x: Math.log10(11000),
+		            y: Math.log10(0.1)+1.5,
+		            text: t.mainSequence || 'Main Sequence',
+		            showarrow: false,
+		            font: { size: 12, color: '#81d4fa', family: 'Space Mono' },
+		            xanchor: 'center',
+		            yanchor: 'middle'            
+		        },	       
+		        {
+		            x: Math.log10(4000),
+		            y: Math.log10(100)+1.5,
+		            text: t.redGiants || 'Red Giants',
+		            showarrow: false,
+		            font: { size: 12, color: '#ff5252', family: 'Space Mono' },
+		            xanchor: 'center',
+		            yanchor: 'middle'            
+		        },	       
+		        {
+		            x: Math.log10(3500),
+		            y: Math.log10(100000)+1.5,
+		            text: t.redSupergiants || 'Red Supergiants',
+		            showarrow: false,
+		            font: { size: 12, color: '#ff0000', family: 'Space Mono' },
+		            xanchor: 'center',
+		            yanchor: 'middle'
+		           
+		        },	       
+		        {
+		            x: Math.log10(15000)-0.1,
+		            y: Math.log10(0.001),
+		            text: t.whiteDwarfs || 'White Dwarfs',
+		            showarrow: false,
+		            font: { size: 12, color: '#ffffff', family: 'Space Mono' },
+		            xanchor: 'center',
+		            yanchor: 'middle'           
+		        },	        
+		        {
+		            x: Math.log10(25000)-0.06,
+		            y: Math.log10(10000)+1.4,
+		            text: t.blueGiants || 'Blue Giants',
+		            showarrow: false,
+		            font: { size: 12, color: '#2b86e0', family: 'Space Mono' },
+		            xanchor: 'center',
+		            yanchor: 'middle'
+		           
+		        },	       
+		        {
+		            x: Math.log10(20000)-0.05,
+		            y: Math.log10(1000000)+1.3,
+		            text: t.blueSupergiants || 'Blue Supergiants',
+		            showarrow: false,
+		            font: { size: 12, color: '#00b0ff', family: 'Space Mono' },
+		            xanchor: 'center',
+		            yanchor: 'middle'            
+		        }
+		    ];
+		}
+		function updateLanguage(lang) {
+		    const t = translations[lang];	  
+		    document.getElementById('main-title').innerText = t.title;
+		    document.getElementById('lbl-temp').innerText = t.lblTemp;
+		    document.getElementById('lbl-lum').innerText = t.lblLum;
+		    document.getElementById('lbl-rad').innerText = t.lblRad;
+		    document.getElementById('lbl-tipo').innerText = t.lblTipo;
+		    document.getElementById('lbl-clase').innerText = t.lblClase;
+		    document.getElementById('referenceText').innerHTML = t.referenceText;
+		    document.getElementById('authorText').textContent = t.authorText;
+		    document.getElementById('creditsText').textContent = t.creditsText;
+		    document.getElementById('contactText').textContent = t.contactText;		
+		    
+		    //Traducir datos estelares
+		    const currentClass = document.getElementById('val-size').innerText;
+		    if (currentClass && currentClass !== '-') {
+		        const translatedClass = t.clases[currentClass] || currentClass;
+		        document.getElementById('val-size').innerText = translatedClass;
+		    }    
+		    if(document.getElementById('star-name').innerText === translations.es.placeholder || 
+		       document.getElementById('star-name').innerText === translations.en.placeholder) {
+		        document.getElementById('star-name').innerText = t.placeholder;
+		    }      
+		    // Actualizar las anotaciones en el gráfico
+		    Plotly.relayout('hr-plot', {
+		        'xaxis.title.text': t.plotX,
+		        'yaxis.title.text': t.plotY,
+		        'annotations': getAnnotations(lang)
+		    });    
+		    // Actualizar los textos de los puntos en Plotly
+		    updatePlotlyTexts(lang);
+		}
+	
+		//Actualizacion de idioma
+	    document.getElementById('languageSelector').addEventListener('change', function() {updateLanguage(this.value);});	
+	    //Inicia siempre en español
+	    document.addEventListener('DOMContentLoaded', function() {updateLanguage('es');});
+        //Adpatar la escala de los radios
+        const traces = Object.keys(estrellas).map(cat => {
+        const group = estrellas[cat];    
+        const TamañoRealista = (radio) => {
+            if (!radio) return 10; 
+            let tamañoLog = (Math.log10(radio) + 2.5) * 10; 
+            return Math.max(4, tamañoLog); 
+        };    
+        return {
+            x: group.map(e => e.temp),
+            y: group.map(e => e.lum),
+            text: group.map(e => e.nombre),
+            mode: 'markers',
+            name: cat,
+            hovertemplate: '<b>%{text}</b><extra></extra>',
+            marker: {           
+                size: group.map(e => TamañoRealista(e.radio)),            
+                color: group.map(e => e.color),
+                line: { width: 2, color: 'rgba(255,255,255,0.5)' }, 
+                opacity: 0.9 
+            },
+            customdata: group.map(e => e)
+        };
+    });
+
+        const layout = {
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(255,255,255,0.02)',
+                showlegend: false,
+                xaxis: {
+                    title: 'log₁₀ Temperatura Efectiva (K)',
+                    type: 'log',
+                    autorange: 'reversed', 
+                    gridcolor: '#1f2937',
+                    color: 'white',        
+                    range: [Math.log10(60000), Math.log10(1500)], 
+                    tickvals: [2000, 3000, 5000, 10000, 20000, 40000, 60000],
+                    ticktext: ['2k', '3k', '5k', '10k', '20k', '40k', '60k'],
+                    padding: 20 
+                },
+                yaxis: {
+                    title: 'log₁₀ Luminosidad (L/L☉)',
+                    type: 'log',
+                    gridcolor: '#1f2937',
+                    color: 'white',
+                    range: [-5, 8] 
+                },
+                hovermode: 'closest',
+                font: { family: 'Space Mono', color: 'white' }, 
+                margin: { t: 20, b: 80, l: 100, r: 60 } 
+            };
+        //Imagenes Representativas
+       const mapaImagenes = {
+        'Supergigante Roja': 'Starsimage/SG-R.png',
+        'Supergigante Azul': 'Starsimage/SG-B.png',
+        'Gigante Azul': 'Starsimage/G-B.png',
+        'Gigante Roja': 'Starsimage/G-R.png',
+        'Secuencia Principal (O)': 'Starsimage/MS-O.png',
+        'Secuencia Principal (B)': 'Starsimage/MS-B.png',
+        'Secuencia Principal (A)': 'Starsimage/MS-A.png',
+        'Secuencia Principal (F)': 'Starsimage/MS-F.png',
+        'Secuencia Principal (G)': 'Starsimage/MS-G.png',
+        'Secuencia Principal (K)': 'Starsimage/MS-K.png',
+        'Secuencia Principal (M)': 'Starsimage/MS-M.png',
+        'Enana Blanca (D)': 'Starsimage/D.png'
+        };
+
+        Plotly.newPlot('hr-plot', traces, layout);
+
+		//Funcion formato cientifico
+		function formatoCientifico(num) {
+	    if (num >= 0.1 && num <= 1000) {
+	        return num.toLocaleString();}
+	    const exp = num.toExponential(2);
+	    return exp.replace('e', ' × 10^').replace('+', '');}
+
+        document.getElementById('hr-plot').on('plotly_click', function(data){
+            const info = data.points[0].customdata;
+            const lang = document.getElementById('languageSelector').value;
+            const nombreTraducido = translations[lang].starNames[info.nombre] || info.nombre;
+            document.getElementById('star-name').innerText = nombreTraducido;         
+            document.getElementById('val-temp').innerText = info.temp.toLocaleString();
+            document.getElementById('val-lum').innerText = formatoCientifico(info.lum);
+            document.getElementById('val-rad').innerText = info.radio ? info.radio.toLocaleString() : 'N/A';
+            document.getElementById('val-tipo').innerText = info.tipo || 'N/A';            
+            const claseTraducida = translations[lang].clases[info.size] || info.size;
+            document.getElementById('val-size').innerText = claseTraducida;
+            //Mostrar Imagenes
+            const imgElement = document.getElementById('star-img');
+            const placeholder = document.getElementById('initial-img');            
+            //Utilizamos size para ubicar la imagen
+            let rutaImagen = mapaImagenes[info.size];        
+            if (rutaImagen) {
+                imgElement.src = rutaImagen;
+                imgElement.style.display = 'block';
+                placeholder.style.display = 'none';               
+                imgElement.style.filter = `drop-shadow(0 0 30px ${info.color})`;
+            }
+            //Boton informacion estelar
+            const actionContainer = document.getElementById('action-container');
+            actionContainer.innerHTML = ''; 
+            if (info.hasPlanets) {
+                const btn = document.createElement('button');
+                btn.className = 'btn-habitable';
+                btn.innerHTML = translations[lang].btnExplore;;
+                btn.onclick = () => {
+                    const targetURL = `hzsystem.html?system=${encodeURIComponent(info.systemID)}`;
+                    window.location.href = targetURL;
+                };
+                actionContainer.appendChild(btn);
+            } else {
+               const span = document.createElement('span');
+			    span.className = 'txt-sin-planetas';
+			    span.innerText = translations[lang].noPlanets; 
+			    actionContainer.appendChild(span);
+			}
+        });
+    </script>
+</body>
+</html>
