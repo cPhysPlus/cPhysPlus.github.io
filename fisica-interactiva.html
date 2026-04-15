@@ -1,181 +1,225 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Física Interactiva</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Física Interactiva</title>
 
-        header, main, footer {
-            width: 80%;
-            max-width: 1200px;
-            box-sizing: border-box;
-            padding: 20px;
-        }
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
-        .banner {
-            background-color: #0c2e8a;
-            color: white;
-            padding: 20px;
-            text-align: center;
-            width: 100%;
-            box-sizing: border-box;
-        }
+<style>
+:root {
+    --primary: #0c2e8a;
+    --accent: #50d8af;
+    --bg: #f5f7fb;
+    --text: #333;
+}
 
-        .row-section {
-            display: flex;
-            flex-wrap: wrap;
-            margin: 20px 0;
-            width: 100%;
-        }
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
 
-        .section-half {
-            flex: 1 1 50%;
-            padding: 20px;
-            box-sizing: border-box;
-            border: 1px solid #eee;
-            margin: 10px;
-            background-color: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: center; /* Centrar texto en las secciones */
-        }
+/* HEADER */
+.banner {
+    background: linear-gradient(135deg, #0c2e8a, #1e4ed8);
+    color: white;
+    padding: 40px 20px;
+    text-align: center;
+    font-size: 28px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
 
-        .section-half h2 {
-            color: #0c2e8a;
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
+/* CONTAINER */
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+}
 
-        .section-half p {
-            line-height: 1.6;
-        }
+/* INTRO */
+header {
+    text-align: center;
+    margin-bottom: 40px;
+}
 
-        .section-half .plot img {
-            max-width: 100%;
-            max-height: 300px;
-            width: auto;
-            height: auto;
-            display: block;
-            margin-bottom: 20px;
-        }
+header h1 {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
 
-        .section-half .equations {
-            margin-bottom: 20px;
-        }
+header p {
+    max-width: 800px;
+    margin: auto;
+    line-height: 1.6;
+}
 
-        .section-half a {
-            display: inline-block;
-            background-color: #50d8af;
-            color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
+/* GRID */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+}
 
-        .section-half a:hover {
-            background-color: #2dc899;
-        }
-    </style>
+/* CARD */
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+    transition: transform 0.25s, box-shadow 0.25s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+}
+
+.card h2 {
+    color: var(--primary);
+    margin-top: 0;
+}
+
+.card img {
+    width: 100%;
+    border-radius: 8px;
+    margin: 15px 0;
+    max-height: 220px;
+    object-fit: cover;
+}
+
+.equations {
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+/* BUTTON */
+.btn {
+    margin-top: auto;
+    text-align: center;
+}
+
+.btn a {
+    background: var(--accent);
+    color: white;
+    padding: 10px 18px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    display: inline-block;
+    transition: background 0.3s;
+}
+
+.btn a:hover {
+    background: #2dc899;
+}
+
+/* FOOTER */
+footer {
+    text-align: center;
+    padding: 20px;
+    margin-top: 40px;
+    background: #eaeef7;
+    font-size: 14px;
+}
+</style>
 </head>
+
 <body>
-    <div class="banner">
-        Applets Interactivas.
+
+<div class="banner">
+    Applets Interactivas para Física y Astronomía
+</div>
+
+<div class="container">
+
+<header>
+    <h1>Física y Astronomía Interactiva</h1>
+    <p>
+        Ejemplos didácticos sobre física y astronomía. 
+        Explora simulaciones interactivas y modifica parámetros para entender mejor los fenómenos físicos.
+    </p>
+</header>
+
+<main class="grid">
+
+<!-- CARD 1 -->
+<div class="card">
+    <h2>Movimiento Parabólico</h2>
+    <p>Trayectoria de un objeto bajo la influencia de la gravedad.</p>
+    <img src="img/plots/parabolico.png">
+    <div class="equations">
+        \(x(t) = v_0 \cos(\theta) t\)<br>
+        \(y(t) = y_0 + v_0 \sin(\theta) t - \frac{1}{2} g t^2\)
     </div>
+    <div class="btn">
+        <a href="fisica-interactiva/movimiento-parabolico.html">Explorar</a>
+    </div>
+</div>
 
-    <header>
-        <h1>Física y Astronomía Interactiva</h1>
-        <p>Aquí incluimos algunos ejemplos didácticos sobre física y astronomía. Los notebooks de Python te permiten ejecutar y/o modificar el código a tu gusto. Las páginas interactivas te permiten visualizar los efectos que tienen los parámetros de cada problema.</p>
-    </header>
+<!-- CARD 2 -->
+<div class="card">
+    <h2>Corrimiento Cosmológico</h2>
+    <p>Expansión del universo y corrimiento al rojo.</p>
+    <img src="img/plots/redshift.jpg">
+    <div class="equations">
+        \(\lambda_{obs} = \lambda_{em} (1 + z)\)<br>
+        \(\nu_{obs} = \frac{\nu_{em}}{1 + z}\)
+    </div>
+    <div class="btn">
+        <a href="fisica-interactiva/corrimiento-cosmologico.html">Explorar</a>
+    </div>
+</div>
 
-    <main>
-        <div class="row-section">
-            <section id="movimiento-parabolico" class="section-half">
-                <h2>1. Movimiento Parabólico</h2>
-                <p>El movimiento parabólico estudia la trayectoria de un objeto bajo la influencia de la gravedad.</p>
-                <div class="plot">
-                    <img src="img/plots/parabolico.png" alt="Movimiento Parabólico (Wikipedia)">
-                </div>
-                <div class="equations">
-                    <p>Ecuaciones del Movimiento parabólico:</p>
-                    <p>Desplazamiento en \(x\): \(x(t) = v_0 \cos(\theta) t\)</p>
-                    <p>Desplazamiento en \(y\): \(y(t) = y_0 + v_0 \sin(\theta) t - \frac{1}{2} g t^2\)</p>
-                </div>
-                <a href="fisica-interactiva/movimiento-parabolico.html">Sitio Interactivo</a>
-            </section>
+<!-- CARD 3 -->
+<div class="card">
+    <h2>Partícula Cuántica 2D</h2>
+    <p>Partícula en un pozo de potencial infinito.</p>
+    <div class="btn">
+        <a href="fisica-interactiva/particula-cuantica.html">Explorar</a>
+    </div>
+</div>
 
-            <section id="corrimiento-cosmologico" class="section-half">
-                <h2>2. Corrimiento Cosmológico de Líneas Espectrales</h2>
-                <p>Las líneas espectrales se corren al rojo debido a la expansión del Universo.</p>
-                <div class="plot">
-                    <img src="img/plots/redshift.jpg" alt="Corrimiento al Rojo Cosmológico (NASA/JPL-Caltech)">
-                </div>
-                <div class="equations">
-                    <p>Ecuaciones:</p>
-                    <p>Longitud de onda: \(\lambda_{obs} = \lambda_{em} (1 + z)\)</p>
-                    <p>Frecuencia: \(\nu_{obs} = \frac{\nu_{em}}{1 + z}\)</p>
-                </div>
-                <a href="fisica-interactiva/corrimiento-cosmologico.html">Sitio Interactivo</a>
-            </section>
-        </div>
+<!-- CARD 4 -->
+<div class="card">
+    <h2>Zonas Habitables</h2>
+    <p>Región donde puede existir agua líquida.</p>
+    <img src="img/plots/hz.png">
+    <div class="btn">
+        <a href="fisica-interactiva/zonas-habitables.html">Explorar</a>
+    </div>
+</div>
 
-        <div class="row-section">
-            <section id="particula-cuantica" class="section-half">
-                <h2>3. Partícula cuántica en 2D</h2>
-                <p>Este es un ejemplo de una partícula cuántica dentro de un pozo de potencial infinito.</p>
-                <div class="equations">
-                </div>
-                <a href="fisica-interactiva/particula-cuantica.html">Sitio Interactivo</a>
-            </section>
-        </div>
+<!-- CARD 5 -->
+<div class="card">
+    <h2>Diagrama H-R</h2>
+    <p>Relación entre luminosidad y temperatura estelar.</p>
+    <img src="img/plots/hz.png">
+    <div class="btn">
+        <a href="fisica-interactiva/Hertzsprung-Russell.html">Explorar</a>
+    </div>
+</div>
 
-        <div class="row-section">
-            <section id="zonas-habitables" class="section-half">
-               <h2>4. Zonas Habitables</h2>
-               <p>La zona habitable es la región alrededor de una estrella donde las condiciones son propicias para la existencia de agua líquida en la superficie de un planeta.</p>
-               <div class="plot">
-               <img src="img/plots/hz.png" alt="Zonas Habitables">
-                </div>
-                <div class="equations">
-                    <p>Ecuaciones de los límites:</p>
-                </div>
-                <a href="fisica-interactiva/zonas-habitables.html">Sitio Interactivo</a>
-            </section>
+<!-- EXTRA -->
+<div class="card">
+    <h2>Más Contenido</h2>
+    <p>Espacio para futuras simulaciones y visualizaciones.</p>
+</div>
 
-        <div class="row-section">
-            <section id="diagrama-hr" class="section-half">
-               <h2>5. Diagrama de Hertzsprung-Russell</h2>
-               <p>El diagrama de Hertzsprung-Russell indica la relación entre las magnitudes absolutas o luminosidades de las estrellas en comparación con sus clasificaciones espectrales (temperaturas).</p>
-               <div class="plot">
-               <img src="img/plots/hz.png" alt="Zonas Habitables">
-                </div>
-                <div class="equations">
-                    <p>Ecuaciones de los límites:</p>
-                </div>
-                <a href="fisica-interactiva/Hertzsprung-Russell.html">Sitio Interactivo</a>
-            </section>
+</main>
 
-    <section class="section-half">
-        <h2>Sección Adicional</h2>
-        <p>Esta sección está disponible para futuras visualizaciones u otros contenidos educativos relacionados con la astrofísica.</p>
-    </section>
-     </div>
+</div>
 
+<footer>
+    © 2026 cPhys+ Group
+</footer>
 
-    </main>
-
-    <footer>
-        <p>© 2025 cPhys+ Group</p>
-    </footer>
 </body>
 </html>
