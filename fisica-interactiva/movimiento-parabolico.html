@@ -10,16 +10,16 @@
 <style>
 :root {
     --primary: #6c5ce7;
-    --accent: #00cec9;
-    --bg: #0f1226;
-    --card: #1c1f3a;
-    --text: #eaeaf0;
+    --accent: #009688;
+    --bg: #ffffff;
+    --card: #f5f7fb;
+    --text: #222;
 }
 
 body {
     font-family: 'Segoe UI', sans-serif;
     margin: 0;
-    background: radial-gradient(circle at top, #1c1f3a, #0f1226);
+    background: var(--bg);
     color: var(--text);
     display: flex;
     flex-direction: column;
@@ -34,17 +34,17 @@ body {
 
 .header h2 {
     margin: 0;
-    font-size: 2.2rem;
-    color: var(--accent);
+    font-size: 2rem;
+    color: var(--primary);
 }
 
 .header p {
     max-width: 700px;
     margin: 10px auto;
-    opacity: 0.8;
+    color: #555;
 }
 
-/* MAIN CONTAINER */
+/* CONTAINER */
 .container {
     width: 95%;
     max-width: 1100px;
@@ -62,14 +62,13 @@ body {
     background: var(--card);
     padding: 15px;
     border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    border: 1px solid #e0e0e0;
 }
 
 .slider-container label {
     display: block;
     margin-bottom: 8px;
     font-size: 0.9rem;
-    opacity: 0.8;
 }
 
 /* SLIDER */
@@ -81,15 +80,15 @@ input[type="range"] {
 /* VALUE */
 .value {
     font-weight: bold;
-    color: var(--accent);
+    color: var(--primary);
 }
 
 /* PLOT */
 .plot-box {
-    background: var(--card);
+    background: white;
     padding: 15px;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
 }
 
 #plotly-graph {
@@ -100,8 +99,7 @@ input[type="range"] {
 /* FOOTER */
 .footer {
     text-align: center;
-    font-size: 0.85rem;
-    opacity: 0.7;
+    font-size: 0.9rem;
     margin: 30px 20px;
     max-width: 800px;
 }
@@ -112,7 +110,7 @@ input[type="range"] {
 
 <div class="header">
     <h2>Movimiento Parabólico</h2>
-    <p>Explora cómo la velocidad inicial y el ángulo afectan la trayectoria de un proyectil.</p>
+    <p>Utiliza los desplazadores para seleccionar las condiciones iniciales del lanzamiento parabólico.</p>
 </div>
 
 <div class="container">
@@ -120,13 +118,13 @@ input[type="range"] {
 <div class="controls">
 
     <div class="slider-container">
-        <label>Velocidad Inicial (v₀) [m/s]</label>
+        <label for="v0_slider">Velocidad Inicial (v₀) [m/s]</label>
         <input type="range" id="v0_slider" min="1" max="50" value="20">
         <div><span class="value" id="v0_value">20</span> m/s</div>
     </div>
 
     <div class="slider-container">
-        <label>Ángulo de Lanzamiento (α) [°]</label>
+        <label for="alpha_slider">Ángulo de Lanzamiento (α) [°]</label>
         <input type="range" id="alpha_slider" min="0" max="90" value="45">
         <div><span class="value" id="alpha_value">45</span> °</div>
     </div>
@@ -140,12 +138,9 @@ input[type="range"] {
 </div>
 
 <div class="footer">
-    <p>
-        Notebook disponible en 
-        <a href="https://github.com/wbandabarragan/computational-physics/blob/main/fisica-interactiva/movimiento-parabolico.ipynb" target="_blank">
-        GitHub</a>.
-    </p>
-    <p>cPhys+ — Universidad Yachay Tech, Ecuador</p>
+    <p>El notebook interactivo de Python está disponible en nuestro repositorio de <a href="https://github.com/wbandabarragan/computational-physics/blob/main/fisica-interactiva/movimiento-parabolico.ipynb">GitHub</a>. Revísalo.</p>
+
+    <p>Elaborado por el Grupo de Física Computacional cPhys+ en la Universidad Yachay Tech, Ecuador.</p>
 </div>
 
 <script>
@@ -162,7 +157,7 @@ function parabolico(v0, alpha_g) {
     const t_vuelo = 2 * v0 * Math.sin(alpha) / g;
     const x_vuelo = (v0 ** 2 * Math.sin(2 * alpha)) / g;
     const y_vuelo = (v0 * Math.sin(alpha)) ** 2 / (2 * g);
-    const t = Array.from({ length: 500 }, (_, i) => i * t_vuelo / 499);
+    const t = Array.from({ length: 1000 }, (_, i) => i * t_vuelo / 999);
     const x = t.map(ti => x0 + v0 * Math.cos(alpha) * ti);
     const y = t.map(ti => y0 + v0 * Math.sin(alpha) * ti - 0.5 * g * ti ** 2);
     return [x, y, t_vuelo, x_vuelo, y_vuelo];
@@ -185,16 +180,14 @@ function grafico(v0, alpha_g) {
         y: y,
         mode: 'lines',
         name: `α = ${alpha_g}°`,
-        line: { color: '#00cec9', width: 3 }
+        line: { color: '#6c5ce7', width: 3 }
     };
 
     const layout = {
-        title: `v₀ = ${v0} m/s | t = ${t_vuelo.toFixed(2)} s | Alcance = ${x_vuelo.toFixed(1)} m`,
-        paper_bgcolor: 'rgba(0,0,0,0)',
-        plot_bgcolor: 'rgba(255,255,255,0.02)',
+        title: `Velocidad inicial = ${v0} m/s, Tiempo de Vuelo = ${t_vuelo.toFixed(2)}s, Alcance Máximo = ${x_vuelo.toFixed(2)}m, Altura Máxima = ${y_vuelo.toFixed(2)}m`,
         xaxis: { title: 'x [m]', range: [-1, max_x + 1] },
         yaxis: { title: 'y [m]', range: [-1, max_y + 1] },
-        font: { color: '#eaeaf0' }
+        template: 'plotly_white'
     };
 
     Plotly.newPlot('plotly-graph', [trace], layout);
@@ -205,19 +198,19 @@ const alpha_slider = document.getElementById("alpha_slider");
 const v0_value = document.getElementById("v0_value");
 const alpha_value = document.getElementById("alpha_value");
 
-v0_slider.addEventListener("input", () => {
+v0_slider.addEventListener("input", function() {
     v0_value.textContent = v0_slider.value;
     grafico(v0_slider.value, alpha_slider.value);
 });
 
-alpha_slider.addEventListener("input", () => {
+alpha_slider.addEventListener("input", function() {
     alpha_value.textContent = alpha_slider.value;
     grafico(v0_slider.value, alpha_slider.value);
 });
 
 grafico(v0_slider.value, alpha_slider.value);
 
-window.addEventListener('resize', () => {
+window.addEventListener('resize', function() {
     grafico(v0_slider.value, alpha_slider.value);
 });
 </script>
