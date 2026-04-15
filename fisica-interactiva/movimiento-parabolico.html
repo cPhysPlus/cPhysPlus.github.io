@@ -26,7 +26,6 @@ body {
     align-items: center;
 }
 
-/* HEADER */
 .header {
     text-align: center;
     padding: 30px 20px 10px;
@@ -44,13 +43,11 @@ body {
     color: #555;
 }
 
-/* CONTAINER */
 .container {
     width: 95%;
     max-width: 1100px;
 }
 
-/* CONTROLS */
 .controls {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -71,19 +68,16 @@ body {
     font-size: 0.9rem;
 }
 
-/* SLIDER */
 input[type="range"] {
     width: 100%;
     accent-color: var(--primary);
 }
 
-/* VALUE */
 .value {
     font-weight: bold;
     color: var(--primary);
 }
 
-/* PLOT */
 .plot-box {
     background: white;
     padding: 15px;
@@ -96,7 +90,21 @@ input[type="range"] {
     height: 550px;
 }
 
-/* FOOTER */
+.export-box {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.export-btn {
+    padding: 10px 18px;
+    font-size: 0.9rem;
+    border: none;
+    border-radius: 6px;
+    background: var(--primary);
+    color: white;
+    cursor: pointer;
+}
+
 .footer {
     text-align: center;
     font-size: 0.9rem;
@@ -118,13 +126,13 @@ input[type="range"] {
 <div class="controls">
 
     <div class="slider-container">
-        <label for="v0_slider">Velocidad Inicial (v₀) [m/s]</label>
+        <label>Velocidad Inicial (v₀) [m/s]</label>
         <input type="range" id="v0_slider" min="1" max="50" value="20">
         <div><span class="value" id="v0_value">20</span> m/s</div>
     </div>
 
     <div class="slider-container">
-        <label for="alpha_slider">Ángulo de Lanzamiento (α) [°]</label>
+        <label>Ángulo de Lanzamiento (α) [°]</label>
         <input type="range" id="alpha_slider" min="0" max="90" value="45">
         <div><span class="value" id="alpha_value">45</span> °</div>
     </div>
@@ -135,11 +143,14 @@ input[type="range"] {
     <div id="plotly-graph"></div>
 </div>
 
+<div class="export-box">
+    <button class="export-btn" id="exportCSV">Exportar datos (CSV)</button>
+</div>
+
 </div>
 
 <div class="footer">
     <p>El notebook interactivo de Python está disponible en nuestro repositorio de <a href="https://github.com/wbandabarragan/computational-physics/blob/main/fisica-interactiva/movimiento-parabolico.ipynb">GitHub</a>. Revísalo.</p>
-
     <p>Elaborado por el Grupo de Física Computacional cPhys+ en la Universidad Yachay Tech, Ecuador.</p>
 </div>
 
@@ -154,26 +165,24 @@ Math.radians = function(degrees) {
 
 function parabolico(v0, alpha_g) {
     const alpha = Math.radians(alpha_g);
+
     const t_vuelo = 2 * v0 * Math.sin(alpha) / g;
     const x_vuelo = (v0 ** 2 * Math.sin(2 * alpha)) / g;
     const y_vuelo = (v0 * Math.sin(alpha)) ** 2 / (2 * g);
+
     const t = Array.from({ length: 1000 }, (_, i) => i * t_vuelo / 999);
+
     const x = t.map(ti => x0 + v0 * Math.cos(alpha) * ti);
     const y = t.map(ti => y0 + v0 * Math.sin(alpha) * ti - 0.5 * g * ti ** 2);
-    return [x, y, t_vuelo, x_vuelo, y_vuelo];
-}
 
-function extremos(v0, a1, a2) {
-    const max_a1 = Math.radians(a1);
-    const max_a2 = Math.radians(a2);
-    const max_y = (v0 * Math.sin(max_a1)) ** 2 / (2 * g);
-    const max_x = (v0 ** 2 * Math.sin(2 * max_a2)) / g;
-    return [max_x, max_y];
+    return [x, y, t, t_vuelo, x_vuelo, y_vuelo];
 }
 
 function grafico(v0, alpha_g) {
-    const [x, y, t_vuelo, x_vuelo, y_vuelo] = parabolico(v0, alpha_g);
-    const [max_x, max_y] = extremos(v0, 90, 45);
+    const [x, y, t, t_vuelo, x_vuelo, y_vuelo] = parabolico(v0, alpha_g);
+
+    const max_x = Math.max(...x);
+    const max_y = Math.max(...y);
 
     const trace = {
         x: x,
@@ -193,6 +202,31 @@ function grafico(v0, alpha_g) {
     Plotly.newPlot('plotly-graph', [trace], layout);
 }
 
+// EXPORTAR CSV con velocidades
+function exportCSV(v0, alpha_g) {
+    const alpha = Math.radians(alpha_g);
+    const [x, y, t] = parabolico(v0, alpha_g);
+
+    let csv = "t,x,y,vx,vy\n";
+
+    for (let i = 0; i < t.length; i++) {
+        const vx = v0 * Math.cos(alpha);
+        const vy = v0 * Math.sin(alpha) - g * t[i];
+
+        csv += `${t[i].toFixed(4)},${x[i].toFixed(4)},${y[i].toFixed(4)},${vx.toFixed(4)},${vy.toFixed(4)}\n`;
+    }
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `trayectoria_v0_${v0}_alpha_${alpha_g}.csv`;
+    a.click();
+
+    window.URL.revokeObjectURL(url);
+}
+
 const v0_slider = document.getElementById("v0_slider");
 const alpha_slider = document.getElementById("alpha_slider");
 const v0_value = document.getElementById("v0_value");
@@ -206,6 +240,10 @@ v0_slider.addEventListener("input", function() {
 alpha_slider.addEventListener("input", function() {
     alpha_value.textContent = alpha_slider.value;
     grafico(v0_slider.value, alpha_slider.value);
+});
+
+document.getElementById("exportCSV").addEventListener("click", function() {
+    exportCSV(v0_slider.value, alpha_slider.value);
 });
 
 grafico(v0_slider.value, alpha_slider.value);
