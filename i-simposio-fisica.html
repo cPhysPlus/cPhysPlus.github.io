@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Simposio de Física Teórica, Astrofísica y Cosmología</title>
 
   <style>
     body {
       font-family: Arial, Helvetica, sans-serif;
       margin: 0;
-      background: #f7f7f7;
+      background: #f5f5f5;
       color: #222;
       line-height: 1.6;
     }
@@ -27,20 +28,21 @@
     }
 
     header p {
-      margin: 0.5rem 0;
-      font-size: 1.1rem;
+      margin: 0.4rem 0;
+      font-size: 1.05rem;
     }
 
     nav {
-      background: #e6e6e6;
+      background: #e5e5e5;
       padding: 1rem;
       text-align: center;
+      border-bottom: 1px solid #ccc;
     }
 
     nav a {
       color: #111;
       text-decoration: none;
-      margin: 0 1rem;
+      margin: 0 0.8rem;
       font-weight: bold;
     }
 
@@ -65,11 +67,78 @@
       margin-bottom: 1rem;
     }
 
+    h3 {
+      margin-top: 1.5rem;
+    }
+
     .info-box {
       background: #f1f1f1;
       border-left: 5px solid #222;
       padding: 1rem;
       margin: 1rem 0;
+    }
+
+    .speakers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .speaker-card {
+      border: 1px solid #ddd;
+      background: #fafafa;
+      padding: 1rem;
+      border-radius: 4px;
+    }
+
+    .speaker-card h3 {
+      margin: 0 0 0.3rem 0;
+      font-size: 1.05rem;
+    }
+
+    .speaker-card p {
+      margin: 0.25rem 0;
+      font-size: 0.95rem;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      font-size: 0.92rem;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.55rem;
+      vertical-align: top;
+    }
+
+    th {
+      background: #222;
+      color: white;
+      text-align: left;
+    }
+
+    .session-row {
+      background: #f5edcf;
+      font-weight: bold;
+    }
+
+    .break-row {
+      background: #f9f2d8;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .moderator {
+      background: #e7f0df;
+      font-weight: bold;
     }
 
     .gallery {
@@ -99,45 +168,6 @@
       color: #555;
     }
 
-    .table-container {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-      font-size: 0.95rem;
-    }
-
-    th, td {
-      border: 1px solid #ccc;
-      padding: 0.6rem;
-      vertical-align: top;
-    }
-
-    th {
-      background: #222;
-      color: white;
-      text-align: left;
-    }
-
-    .session-row {
-      background: #f5edcf;
-      font-weight: bold;
-    }
-
-    .break-row {
-      background: #f9f2d8;
-      font-weight: bold;
-      text-align: center;
-    }
-
-    .moderator {
-      background: #e7f0df;
-      font-weight: bold;
-    }
-
     footer {
       background: #111;
       color: white;
@@ -165,6 +195,7 @@
   <nav>
     <a href="#acerca">Acerca del evento</a>
     <a href="#informacion">Información importante</a>
+    <a href="#conferencistas">Conferencistas</a>
     <a href="#programa">Programa</a>
     <a href="#imagenes">Imágenes</a>
   </nav>
@@ -176,11 +207,14 @@
 
       <p>
         El <strong>Simposio de Física Teórica, Astrofísica y Cosmología</strong>
-        es un evento académico organizado por la Universidad Yachay Tech y la UDLA.
-        El simposio reúne a conferencistas, estudiantes de pregrado y posgrado,
-        y jóvenes investigador@s interesad@s en temas de física teórica,
-        astrofísica, cosmología, gravitación, relatividad, física computacional
-        y áreas afines.
+        es un evento académico organizado por la Universidad Yachay Tech y la
+        Universidad de las Américas.
+      </p>
+
+      <p>
+        El simposio reúne a investigador@s, docentes y estudiantes de pregrado
+        y posgrado interesad@s en temas de física teórica, astrofísica,
+        cosmología, gravitación, relatividad, física computacional y áreas afines.
       </p>
 
       <p>
@@ -232,6 +266,96 @@
           Se recomienda consultar con l@s estudiantes locales sobre las mejores opciones.
         </p>
       </div>
+    </section>
+
+    <section id="conferencistas">
+      <h2>Conferencistas</h2>
+
+      <p>
+        El simposio contará con la participación de conferencistas de distintas
+        universidades nacionales e internacionales, además de presentaciones
+        cortas de estudiantes y clubes académicos.
+      </p>
+
+      <div class="speakers-grid">
+
+        <div class="speaker-card">
+          <h3>Óscar Lasso</h3>
+          <p><strong>Institución:</strong> UDLA</p>
+          <p><strong>Charla:</strong> Constraints in quantum gravity using geometric flows</p>
+        </div>
+
+        <div class="speaker-card">
+          <h3>Jaime Calderón Figueroa</h3>
+          <p><strong>Institución:</strong> EPN</p>
+          <p><strong>Charla:</strong> Universal signatures of quantum entanglement in the sky</p>
+        </div>
+
+        <div class="speaker-card">
+          <h3>Pablo Bueno</h3>
+          <p><strong>Institución:</strong> Universidad de Barcelona</p>
+          <p><strong>Charla:</strong> Gravedad Cuántica y holografía</p>
+        </div>
+
+        <div class="speaker-card">
+          <h3>Boris Bermúdez</h3>
+          <p><strong>Institución:</strong> PUC Chile</p>
+          <p><strong>Charla:</strong> Flujos heteróticos y transporte óptimo</p>
+        </div>
+
+        <div class="speaker-card">
+          <h3>Mikaela Carrasco</h3>
+          <p><strong>Institución:</strong> USFQ</p>
+          <p><strong>Charla:</strong> Ultracompact stars with polynomial complexity by Gravitational Decoupling</p>
+        </div>
+
+        <div class="speaker-card">
+          <h3>Jonathan Quirola</h3>
+          <p><strong>Institución:</strong> PUC Chile</p>
+          <p><strong>Charla:</strong> Extragalactic Fast X-ray Transient Candidates Discovered by Chandra</p>
+        </div>
+
+        <div class="speaker-card">
+          <h3>Marcela Morillo</h3>
+          <p><strong>Institución:</strong> UTC</p>
+          <p><strong>Charla:</strong> Por confirmar</p>
+        </div>
+
+        <div class="speaker-card">
+          <h3>Nicolás Vásquez</h3>
+          <p><strong>Institución:</strong> EPN</p>
+          <p><strong>Charla:</strong> ¿Acaso los GRBs afectan su vecindad estelar y galáctica?</p>
+        </div>
+
+        <div class="speaker-card">
+          <h3>Clara Rojas</h3>
+          <p><strong>Institución:</strong> Universidad Yachay Tech</p>
+          <p><strong>Charla:</strong> Inflationary Cosmology after Planck 2018 results</p>
+        </div>
+
+        <div class="speaker-card">
+          <h3>Helga Dénes</h3>
+          <p><strong>Institución:</strong> Universidad Yachay Tech</p>
+          <p><strong>Charla:</strong> New radio sky surveys: opportunities for Ecuadorian students</p>
+        </div>
+
+        <div class="speaker-card">
+          <h3>Wladimir Banda-Barragán</h3>
+          <p><strong>Institución:</strong> Universidad Yachay Tech</p>
+          <p><strong>Charla:</strong> Computational astrophysics in Ecuador: towards community-built projects</p>
+        </div>
+
+      </div>
+
+      <h3>Presentaciones cortas y clubes estudiantiles</h3>
+
+      <p>
+        El programa también incluye presentaciones cortas de Pauly Unapucha,
+        Daniela Arellano, Sebastián Valladares, Jennifer Chacón, Andrés Villares,
+        Álvaro Martínez, Adalí Venegas, Britney Robalino, Bryan Pinargote,
+        Kevin Espinosa De Los Monteros, Cynthia Arias, David Andrade y
+        Cristian Panchana.
+      </p>
     </section>
 
     <section id="programa">
