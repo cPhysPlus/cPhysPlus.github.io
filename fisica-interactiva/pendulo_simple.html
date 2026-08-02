@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Péndulo Simple - Laboratorio Interactivo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+    :root {
+        --primary: #6c5ce7;
+        --accent: #009688;
+        --bg: #f8f9fa;
+        --card: #ffffff;
+        --text: #2d3436;
+        --success: #00b894;
+        --danger: #e74c3c;
+    }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .header {
+        text-align: center;
+        padding: 20px;
+        background: var(--card);
+        width: 100%;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        box-sizing: border-box;
+    }
+    .header h2 { margin: 0; color: var(--primary); font-size: 2rem; }
+    .header p { color: #636e72; margin: 8px 0 0; }
+    .container { width: 95%; max-width: 1000px; margin-top: 20px; }
+    .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+    .panel {
+        background: var(--card);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    .panel h3 { margin-top: 0; color: var(--text); }
+    label { font-weight: 600; margin-bottom: 8px; display: block; color: #555; }
+    input[type=number] {
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+        font-size: 1rem;
+        width: 100%;
+        box-sizing: border-box;
+        outline: none;
+    }
+    input[type=number]:focus { border-color: var(--primary); }
+    .controls-row { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+    button {
+        border: none;
+        padding: 12px 18px;
+        font-size: 1rem;
+        font-weight: bold;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.3s, transform 0.1s;
+        color: white;
+        flex: 1;
+        min-width: 140px;
+    }
+    button:active { transform: scale(0.98); }
+    button:disabled { background: #b2bec3 !important; cursor: not-allowed; transform: none; }
+    .btn-start { background: var(--success); }
+    .btn-start:hover:not(:disabled) { background: #019875; }
+    .btn-stop { background: var(--danger); }
+    .btn-stop:hover:not(:disabled) { background: #c0392b; }
+    .btn-export { background: var(--primary); }
+    .btn-export:hover:not(:disabled) { background: #5a4bcf; }
+    .btn-reset { background: #636e72; }
+    .btn-reset:hover:not(:disabled) { background: #4b5254; }
+    .btn-update { background: var(--accent); }
+    .btn-update:hover:not(:disabled) { background: #00786a; }
+
+    .stopwatch {
+        text-align: center;
+        font-size: 3rem;
+        font-weight: bold;
+        color: var(--primary);
+        font-family: 'Courier New', monospace;
+        margin: 10px 0;
+    }
+    .status { text-align: center; color: #636e72; min-height: 20px; margin-bottom: 5px; }
+
+    #pendulo-canvas {
+        display: block;
+        margin: 0 auto;
+        background: #fdfdff;
+        border-radius: 8px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    th, td {
+        padding: 10px;
+        text-align: center;
+        border-bottom: 1px solid #eee;
+    }
+    th { background: #f1f0fd; color: var(--primary); }
+    tr:hover { background: #fafaff; }
+    .empty-row td { color: #b2bec3; font-style: italic; }
+
+    .export-box { text-align: center; margin: 20px 0 40px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .export-box button { flex: none; min-width: 200px; }
+
+    .footer { text-align: center; color: #636e72; font-size: 1rem; margin: 0 0 30px; }
+    .footer .bandera { font-size: 1.4em; }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h2>Péndulo Simple - Laboratorio Interactivo</h2>
+    <p>Ajusta la longitud, suelta el péndulo y detén el cronómetro tú mismo al completar una oscilación completa.</p>
+    <p>Luego, lleva tus datos a un notebook de análisis y verifica el valor de la gravedad en la Tierra.</p>
+</div>
+
+<div class="container">
+    <div class="grid">
+        <div class="panel">
+            <h3>Simulación</h3>
+            <canvas id="pendulo-canvas" width="380" height="380"></canvas>
+        </div>
+
+        <div class="panel">
+            <h3>Controles del experimento</h3>
+            <label for="longitud">Longitud del péndulo (metros)</label>
+            <input type="number" id="longitud" value="1.0" min="0.1" max="3" step="0.05">
+
+            <div class="controls-row">
+                <button class="btn-update" id="updateBtn">🔄 Actualizar configuración</button>
+            </div>
+
+            <div class="controls-row">
+                <button class="btn-start" id="startBtn">▶ Soltar péndulo</button>
+            </div>
+
+            <p class="status" id="status">Ajusta la longitud y presiona "Actualizar configuración".</p>
+            <div class="stopwatch" id="stopwatch">0.00 s</div>
+
+            <div class="controls-row">
+                <button class="btn-start" id="cronoBtn" disabled>⏱ Iniciar cronómetro</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h3>Datos registrados</h3>
+        <table id="tabla-datos">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Longitud (m)</th>
+                    <th>Período medido (s)</th>
+                    <th>Período teórico (s)</th>
+                    <th>Error (%)</th>
+                </tr>
+            </thead>
+            <tbody id="tabla-body">
+                <tr class="empty-row"><td colspan="5">Aún no hay datos registrados.</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="export-box">
+        <button class="btn-reset" id="deleteLastBtn">🗑 Borrar último registro</button>
+        <button class="btn-reset" id="resetBtn">↺ Reiniciar tabla</button>
+        <button class="btn-export" id="exportBtn">📊 Exportar tabla a Excel</button>
+    </div>
+</div>
+
+<p class="footer">Elaborado por el Grupo de Física Computacional en la universidad Yachay Tech, Ecuador. <span class="bandera">🇪🇨</span></p>
+
+<script>
+    const g = 9.81;
+    const canvas = document.getElementById('pendulo-canvas');
+    const ctx = canvas.getContext('2d');
+    const pivotX = canvas.width / 2;
+    const pivotY = 40;
+    const theta0 = 20 * Math.PI / 180; // amplitud inicial (ángulo pequeño)
+
+    let longitudActual = parseFloat(document.getElementById('longitud').value);
+    let animando = false;
+    let cronometroActivo = false;
+    let tStartAnim = null;
+    let tStartCrono = null;
+    let animFrameId = null;
+    let cronoIntervalId = null;
+
+    let datos = []; // {longitud, periodoMedido, periodoTeorico}
+
+    function escalaPx(longitudMetros) {
+        // Escala longitud (m) a píxeles, ajustada al tamaño del canvas
+        const maxPx = 300;
+        const pxPorMetro = Math.min(150, maxPx / Math.max(longitudMetros, 0.1));
+        return longitudMetros * pxPorMetro;
+    }
+
+    function dibujarGuias(Lpx) {
+        const xIzq = pivotX - Lpx * Math.sin(theta0);
+        const yIzq = pivotY + Lpx * Math.cos(theta0);
+        const xDer = pivotX + Lpx * Math.sin(theta0);
+        const yDer = pivotY + Lpx * Math.cos(theta0);
+
+        ctx.save();
+        ctx.strokeStyle = '#b2bec3';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([6, 4]);
+
+        // Línea vertical de referencia (posición de equilibrio)
+        ctx.beginPath();
+        ctx.moveTo(pivotX, pivotY);
+        ctx.lineTo(pivotX, pivotY + Lpx);
+        ctx.stroke();
+
+        // Líneas de extensión máxima (izquierda y derecha)
+        ctx.beginPath();
+        ctx.moveTo(pivotX, pivotY);
+        ctx.lineTo(xIzq, yIzq);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(pivotX, pivotY);
+        ctx.lineTo(xDer, yDer);
+        ctx.stroke();
+
+        ctx.setLineDash([]);
+        ctx.restore();
+
+        // Marcadores en los extremos y en el punto de equilibrio
+        ctx.save();
+        ctx.strokeStyle = '#636e72';
+        ctx.lineWidth = 1.5;
+        [[xIzq, yIzq], [xDer, yDer], [pivotX, pivotY + Lpx]].forEach(([x, y]) => {
+            ctx.beginPath();
+            ctx.arc(x, y, 4, 0, 2 * Math.PI);
+            ctx.stroke();
+        });
+        ctx.restore();
+    }
+
+    function dibujarPendulo(angulo) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const Lpx = escalaPx(longitudActual);
+        const bobX = pivotX + Lpx * Math.sin(angulo);
+        const bobY = pivotY + Lpx * Math.cos(angulo);
+
+        dibujarGuias(Lpx);
+
+        // Soporte
+        ctx.strokeStyle = '#2d3436';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(pivotX - 40, pivotY);
+        ctx.lineTo(pivotX + 40, pivotY);
+        ctx.stroke();
+
+        // Cuerda
+        ctx.strokeStyle = '#636e72';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(pivotX, pivotY);
+        ctx.lineTo(bobX, bobY);
+        ctx.stroke();
+
+        // Pivote
+        ctx.fillStyle = '#2d3436';
+        ctx.beginPath();
+        ctx.arc(pivotX, pivotY, 5, 0, 2 * Math.PI);
+        ctx.fill();
+
+        // Masa (bob)
+        ctx.fillStyle = '#e74c3c';
+        ctx.beginPath();
+        ctx.arc(bobX, bobY, 16, 0, 2 * Math.PI);
+        ctx.fill();
+    }
+
+    function anguloEnTiempo(t, L) {
+        const omega = Math.sqrt(g / L);
+        return theta0 * Math.cos(omega * t);
+    }
+
+    function loopAnimacion(timestamp) {
+        if (!tStartAnim) tStartAnim = timestamp;
+        const t = (timestamp - tStartAnim) / 1000;
+        const angulo = anguloEnTiempo(t, longitudActual);
+        dibujarPendulo(angulo);
+        if (animando) {
+            animFrameId = requestAnimationFrame(loopAnimacion);
+        }
+    }
+
+    function actualizarCronometro() {
+        const t = (Date.now() - tStartCrono) / 1000;
+        document.getElementById('stopwatch').textContent = t.toFixed(2) + ' s';
+    }
+
+    function detenerTodo() {
+        animando = false;
+        cronometroActivo = false;
+        if (animFrameId) cancelAnimationFrame(animFrameId);
+        if (cronoIntervalId) clearInterval(cronoIntervalId);
+        tStartAnim = null;
+    }
+
+    function actualizarConfiguracion() {
+        const valor = parseFloat(document.getElementById('longitud').value);
+        if (!valor || valor <= 0) {
+            alert('Ingresa una longitud válida (mayor que 0).');
+            return;
+        }
+        detenerTodo();
+        longitudActual = valor;
+        dibujarPendulo(theta0);
+
+        document.getElementById('stopwatch').textContent = '0.00 s';
+        document.getElementById('longitud').disabled = false;
+
+        const startBtn = document.getElementById('startBtn');
+        startBtn.disabled = false;
+        startBtn.textContent = '▶ Soltar péndulo';
+        startBtn.classList.remove('btn-stop');
+        startBtn.classList.add('btn-start');
+
+        const cronoBtn = document.getElementById('cronoBtn');
+        cronoBtn.disabled = true;
+        cronoBtn.textContent = '⏱ Iniciar cronómetro';
+        cronoBtn.classList.remove('btn-stop');
+        cronoBtn.classList.add('btn-start');
+
+        document.getElementById('status').textContent = `Configuración actualizada: L = ${longitudActual} m. Presiona "Soltar péndulo".`;
+    }
+
+    function toggleSoltarPendulo() {
+        const startBtn = document.getElementById('startBtn');
+
+        if (!animando) {
+            // Soltar péndulo
+            animando = true;
+            tStartAnim = null;
+
+            startBtn.textContent = '■ Detener péndulo';
+            startBtn.classList.remove('btn-start');
+            startBtn.classList.add('btn-stop');
+            document.getElementById('longitud').disabled = true;
+            document.getElementById('cronoBtn').disabled = false;
+            document.getElementById('status').textContent = 'Péndulo en movimiento. Presiona "Iniciar cronómetro" para medir una oscilación.';
+
+            animFrameId = requestAnimationFrame(loopAnimacion);
+        } else {
+            // Detener péndulo
+            animando = false;
+            if (animFrameId) cancelAnimationFrame(animFrameId);
+            tStartAnim = null;
+
+            const cronoBtn = document.getElementById('cronoBtn');
+            if (cronometroActivo) {
+                cronometroActivo = false;
+                clearInterval(cronoIntervalId);
+            }
+            cronoBtn.textContent = '⏱ Iniciar cronómetro';
+            cronoBtn.classList.remove('btn-stop');
+            cronoBtn.classList.add('btn-start');
+            cronoBtn.disabled = true;
+
+            startBtn.textContent = '▶ Soltar péndulo';
+            startBtn.classList.remove('btn-stop');
+            startBtn.classList.add('btn-start');
+
+            document.getElementById('stopwatch').textContent = '0.00 s';
+            document.getElementById('longitud').disabled = false;
+            document.getElementById('status').textContent = 'Péndulo detenido. Presiona "Soltar péndulo" para iniciar de nuevo.';
+
+            dibujarPendulo(theta0);
+        }
+    }
+
+    function toggleCronometro() {
+        const cronoBtn = document.getElementById('cronoBtn');
+
+        if (!cronometroActivo) {
+            // Iniciar
+            if (!animando) return;
+            cronometroActivo = true;
+            tStartCrono = Date.now();
+
+            cronoBtn.textContent = '⏹ Detener cronómetro';
+            cronoBtn.classList.remove('btn-start');
+            cronoBtn.classList.add('btn-stop');
+            document.getElementById('status').textContent = 'Cronómetro en marcha. Detente al completar una oscilación completa.';
+
+            cronoIntervalId = setInterval(actualizarCronometro, 30);
+        } else {
+            // Detener y registrar
+            const periodoMedido = (Date.now() - tStartCrono) / 1000;
+            cronometroActivo = false;
+            clearInterval(cronoIntervalId);
+
+            const periodoTeorico = 2 * Math.PI * Math.sqrt(longitudActual / g);
+            const error = ((periodoMedido - periodoTeorico) / periodoTeorico) * 100;
+
+            datos.push({
+                longitud: longitudActual,
+                periodoMedido: periodoMedido,
+                periodoTeorico: periodoTeorico,
+                error: error
+            });
+            renderTabla();
+
+            cronoBtn.textContent = '⏱ Iniciar cronómetro';
+            cronoBtn.classList.remove('btn-stop');
+            cronoBtn.classList.add('btn-start');
+            document.getElementById('status').textContent = `Dato registrado: L = ${longitudActual} m, T = ${periodoMedido.toFixed(2)} s. Puedes medir otra oscilación o actualizar la longitud.`;
+        }
+    }
+
+    function borrarUltimoRegistro() {
+        if (datos.length === 0) return;
+        datos.pop();
+        renderTabla();
+        document.getElementById('status').textContent = 'Se borró el último registro.';
+    }
+
+    function renderTabla() {
+        const tbody = document.getElementById('tabla-body');
+        if (datos.length === 0) {
+            tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Aún no hay datos registrados.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = datos.map((d, i) => `
+            <tr>
+                <td>${i + 1}</td>
+                <td>${d.longitud.toFixed(2)}</td>
+                <td>${d.periodoMedido.toFixed(2)}</td>
+                <td>${d.periodoTeorico.toFixed(2)}</td>
+                <td>${d.error.toFixed(1)}%</td>
+            </tr>
+        `).join('');
+    }
+
+    function reiniciarTabla() {
+        if (datos.length > 0 && !confirm('¿Borrar todos los datos registrados?')) return;
+        datos = [];
+        renderTabla();
+        document.getElementById('status').textContent = 'Tabla reiniciada. Ajusta la longitud y presiona "Actualizar configuración".';
+    }
+
+    function exportarExcel() {
+        if (datos.length === 0) {
+            alert('No hay datos para exportar. Registra al menos una medición.');
+            return;
+        }
+        const filas = datos.map((d, i) => ({
+            '#': i + 1,
+            'Longitud (m)': Number(d.longitud.toFixed(3)),
+            'Período medido (s)': Number(d.periodoMedido.toFixed(3)),
+            'Período teórico (s)': Number(d.periodoTeorico.toFixed(3)),
+            'Error (%)': Number(d.error.toFixed(2))
+        }));
+        const hoja = XLSX.utils.json_to_sheet(filas);
+        const libro = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(libro, hoja, 'Péndulo Simple');
+        XLSX.writeFile(libro, 'datos_pendulo_simple.xlsx');
+    }
+
+    // Dibujo inicial (péndulo en reposo)
+    dibujarPendulo(theta0);
+
+    document.getElementById('updateBtn').addEventListener('click', actualizarConfiguracion);
+    document.getElementById('startBtn').addEventListener('click', toggleSoltarPendulo);
+    document.getElementById('cronoBtn').addEventListener('click', toggleCronometro);
+    document.getElementById('deleteLastBtn').addEventListener('click', borrarUltimoRegistro);
+    document.getElementById('resetBtn').addEventListener('click', reiniciarTabla);
+    document.getElementById('exportBtn').addEventListener('click', exportarExcel);
+</script>
+</body>
+</html>
