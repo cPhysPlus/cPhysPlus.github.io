@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimiento Parabólico - Laboratorio Interactivo</title>
+<style>
+    :root {
+        --primary: #6c5ce7;
+        --accent: #009688;
+        --gold: #f5b74e;
+        --bg: #f8f9fa;
+        --card: #ffffff;
+        --text: #2d3436;
+        --success: #00b894;
+        --danger: #e74c3c;
+    }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .header {
+        text-align: center;
+        padding: 20px;
+        background: var(--card);
+        width: 100%;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        box-sizing: border-box;
+    }
+    .header h2 { margin: 0; color: var(--primary); font-size: 2rem; }
+    .header p { color: #636e72; margin: 8px 0 0; }
+    .container { width: 95%; max-width: 1000px; margin-top: 20px; }
+    .grid {
+        display: grid;
+        grid-template-columns: 1.15fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+    .panel {
+        background: var(--card);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    .panel h3 { margin-top: 0; color: var(--text); }
+    label { font-weight: 600; margin-bottom: 8px; display: block; color: #555; }
+
+    .slider-row { margin-bottom: 16px; }
+    .slider-row input[type=range] { width: 100%; }
+    .slider-row input[type=range]:disabled { opacity: 0.5; }
+    .slider-readout { font-family: 'Courier New', monospace; font-weight: bold; color: var(--primary); }
+
+    .controls-row { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+    button {
+        border: none;
+        padding: 12px 18px;
+        font-size: 1rem;
+        font-weight: bold;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.3s, transform 0.1s;
+        color: white;
+        flex: 1;
+        min-width: 140px;
+    }
+    button:active { transform: scale(0.98); }
+    button:disabled { background: #b2bec3 !important; cursor: not-allowed; transform: none; }
+    .btn-start { background: var(--success); }
+    .btn-start:hover:not(:disabled) { background: #019875; }
+    .btn-export { background: var(--primary); }
+    .btn-export:hover:not(:disabled) { background: #5a4bcf; }
+    .btn-reset { background: #636e72; }
+    .btn-reset:hover:not(:disabled) { background: #4b5254; }
+
+    .status { text-align: center; color: #636e72; min-height: 20px; margin: 10px 0 5px; }
+
+    #parabolico-canvas {
+        display: block;
+        margin: 0 auto;
+        background: #fdfdff;
+        border-radius: 8px;
+        max-width: 100%;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-top: 14px;
+    }
+    .stats-grid div {
+        background: #f1f0fd;
+        border-radius: 8px;
+        padding: 10px;
+        text-align: center;
+    }
+    .stats-grid strong { display: block; color: var(--primary); font-size: 1.15rem; }
+    .stats-grid span { font-size: 0.78rem; color: #636e72; }
+
+    .export-box { text-align: center; margin: 20px 0 20px; }
+
+    .footer { text-align: center; color: #636e72; font-size: 1rem; margin: 0 0 30px; }
+    .footer .bandera { font-size: 1.4em; }
+    .footer-note { text-align: center; color: #636e72; font-size: 0.9rem; margin: 0 0 10px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h2>Movimiento Parabólico - Laboratorio Interactivo</h2>
+    <p>Ajusta la velocidad inicial y el ángulo de lanzamiento, luego presiona "Iniciar lanzamiento" para ver al cohete volar y dejar la estela de su trayectoria.</p>
+    <p>Cuando termine el vuelo, registra la trayectoria y llévala a un notebook de análisis.</p>
+</div>
+
+<div class="container">
+    <div class="grid">
+        <div class="panel">
+            <h3>Simulación</h3>
+            <canvas id="parabolico-canvas" width="560" height="380"></canvas>
+            <div class="stats-grid">
+                <div><strong id="statTiempo">0.00 s</strong><span>Tiempo de vuelo</span></div>
+                <div><strong id="statAlcance">0.00 m</strong><span>Alcance máximo</span></div>
+                <div><strong id="statAltura">0.00 m</strong><span>Altura máxima</span></div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h3>Condiciones de lanzamiento</h3>
+            <div class="slider-row">
+                <label for="v0_slider">Velocidad inicial (v<sub>0</sub>): <span class="slider-readout" id="v0_value">20</span> m/s</label>
+                <input type="range" id="v0_slider" min="1" max="50" value="20" step="1">
+            </div>
+            <div class="slider-row">
+                <label for="alpha_slider">Ángulo de lanzamiento (α): <span class="slider-readout" id="alpha_value">45</span> °</label>
+                <input type="range" id="alpha_slider" min="0" max="90" value="45" step="1">
+            </div>
+
+            <div class="controls-row">
+                <button class="btn-start" id="launchBtn">🚀 Iniciar lanzamiento</button>
+            </div>
+
+            <p class="status" id="status">Ajusta las condiciones y presiona "Iniciar lanzamiento".</p>
+
+            <div class="controls-row">
+                <button class="btn-export" id="registrarBtn" disabled>📊 Registrar y Descargar Trayectoria</button>
+            </div>
+            <div class="controls-row">
+                <button class="btn-reset" id="resetBtn">↺ Reiniciar simulación</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<p class="footer-note">El notebook interactivo de Python está disponible en nuestro repositorio de <a href="https://github.com/wbandabarragan/computational-physics/blob/main/fisica-interactiva/movimiento-parabolico.ipynb" target="_blank">GitHub</a>. Revísalo.</p>
+
+<p class="footer">Elaborado por el Grupo de Física Computacional, cPhys+, de la Universidad Yachay Tech. <span class="bandera">🇪🇨</span></p>
+
+<script>
+    const g = 9.8; // Aceleración gravitatoria (m/s^2), igual que en la versión original
+    const x0 = 0;
+    const y0 = 0;
+    const N_MUESTRAS = 150; // número de filas que tendrá el CSV exportado
+
+    const canvas = document.getElementById('parabolico-canvas');
+    const ctx = canvas.getContext('2d');
+    const margin = { left: 55, right: 25, top: 25, bottom: 45 };
+
+    const v0Slider = document.getElementById('v0_slider');
+    const alphaSlider = document.getElementById('alpha_slider');
+    const v0Value = document.getElementById('v0_value');
+    const alphaValue = document.getElementById('alpha_value');
+    const launchBtn = document.getElementById('launchBtn');
+    const registrarBtn = document.getElementById('registrarBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const statusEl = document.getElementById('status');
+
+    let volando = false;
+    let animFrameId = null;
+    let ultimaTrayectoria = null; // guarda la última trayectoria completada, lista para exportar
+
+    function radianes(grados) { return grados * Math.PI / 180; }
+
+    // Misma física que la versión original: devuelve la trayectoria completa
+    function calcularTrayectoria(v0, alphaGrados, nMuestras) {
+        const alpha = radianes(alphaGrados);
+        const t_vuelo = (2 * v0 * Math.sin(alpha)) / g;
+        const x_vuelo = (v0 ** 2 * Math.sin(2 * alpha)) / g;
+        const y_vuelo = (v0 * Math.sin(alpha)) ** 2 / (2 * g);
+
+        const n = Math.max(nMuestras, 2);
+        const t = Array.from({ length: n }, (_, i) => (i * t_vuelo) / (n - 1));
+        const x = t.map(ti => x0 + v0 * Math.cos(alpha) * ti);
+        const y = t.map(ti => y0 + v0 * Math.sin(alpha) * ti - 0.5 * g * ti ** 2);
+        const vx = t.map(() => v0 * Math.cos(alpha));
+        const vy = t.map(ti => v0 * Math.sin(alpha) - g * ti);
+
+        return { t, x, y, vx, vy, t_vuelo, x_vuelo, y_vuelo, v0, alpha: alphaGrados };
+    }
+
+    // --- escalado y dibujo ---
+    function escalas(xMax, yMax) {
+        const plotW = canvas.width - margin.left - margin.right;
+        const plotH = canvas.height - margin.top - margin.bottom;
+        const xRange = Math.max(xMax, 1);
+        const yRange = Math.max(yMax, 1);
+        return {
+            plotW, plotH,
+            px: (xm) => margin.left + (xm / xRange) * plotW,
+            py: (ym) => canvas.height - margin.bottom - (ym / yRange) * plotH,
+        };
+    }
+
+    function dibujarEjes(esc, xMax, yMax) {
+        ctx.save();
+        ctx.strokeStyle = '#dcdde6';
+        ctx.fillStyle = '#8892b0';
+        ctx.font = '11px Arial';
+        ctx.lineWidth = 1;
+
+        // líneas guía verticales/horizontales (estilo similar a las otras applets)
+        const pasosX = 5, pasosY = 5;
+        for (let i = 0; i <= pasosX; i++) {
+            const xm = (xMax * i) / pasosX;
+            const px = esc.px(xm);
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(px, margin.top);
+            ctx.lineTo(px, canvas.height - margin.bottom);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.textAlign = 'center';
+            ctx.fillText(xm.toFixed(0), px, canvas.height - margin.bottom + 16);
+        }
+        for (let i = 0; i <= pasosY; i++) {
+            const ym = (yMax * i) / pasosY;
+            const py = esc.py(ym);
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(margin.left, py);
+            ctx.lineTo(canvas.width - margin.right, py);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.textAlign = 'right';
+            ctx.fillText(ym.toFixed(0), margin.left - 8, py + 3);
+        }
+
+        // ejes principales
+        ctx.strokeStyle = '#636e72';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(margin.left, canvas.height - margin.bottom);
+        ctx.lineTo(canvas.width - margin.right, canvas.height - margin.bottom);
+        ctx.moveTo(margin.left, margin.top);
+        ctx.lineTo(margin.left, canvas.height - margin.bottom);
+        ctx.stroke();
+
+        ctx.fillStyle = '#636e72';
+        ctx.font = 'bold 12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('x [m]', (margin.left + canvas.width - margin.right) / 2, canvas.height - 8);
+        ctx.save();
+        ctx.translate(14, (margin.top + canvas.height - margin.bottom) / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillText('y [m]', 0, 0);
+        ctx.restore();
+        ctx.restore();
+    }
+
+    function dibujarEstela(esc, xs, ys, hastaIndice) {
+        if (hastaIndice < 1) return;
+        ctx.save();
+        ctx.strokeStyle = 'rgba(108, 92, 231, 0.75)';
+        ctx.lineWidth = 3;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(esc.px(xs[0]), esc.py(ys[0]));
+        for (let i = 1; i <= hastaIndice; i++) {
+            ctx.lineTo(esc.px(xs[i]), esc.py(ys[i]));
+        }
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    function dibujarCohete(esc, xm, ym, anguloRad) {
+        const px = esc.px(xm);
+        const py = esc.py(ym);
+        ctx.save();
+        ctx.translate(px, py);
+        ctx.rotate(-anguloRad); // el canvas gira en sentido opuesto al eje y matemático
+
+        // llama
+        ctx.fillStyle = '#f5b74e';
+        ctx.beginPath();
+        ctx.moveTo(-14, 5);
+        ctx.lineTo(-24, 0);
+        ctx.lineTo(-14, -5);
+        ctx.closePath();
+        ctx.fill();
+
+        // cuerpo del cohete
+        ctx.fillStyle = '#6c5ce7';
+        ctx.beginPath();
+        ctx.moveTo(16, 0);
+        ctx.lineTo(-12, 7);
+        ctx.lineTo(-6, 0);
+        ctx.lineTo(-12, -7);
+        ctx.closePath();
+        ctx.fill();
+
+        // ventana
+        ctx.fillStyle = '#fdfdff';
+        ctx.beginPath();
+        ctx.arc(4, 0, 3, 0, 2 * Math.PI);
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    function dibujarEscenaEstatica(v0, alphaGrados) {
+        // vista previa (sin volar) para que se vea algo mientras se ajustan los sliders
+        const preview = calcularTrayectoria(v0, alphaGrados, 60);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const esc = escalas(preview.x_vuelo, preview.y_vuelo);
+        dibujarEjes(esc, preview.x_vuelo, preview.y_vuelo);
+
+        // curva de vista previa, punteada
+        ctx.save();
+        ctx.strokeStyle = '#c7c2f5';
+        ctx.setLineDash([5, 4]);
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(esc.px(preview.x[0]), esc.py(preview.y[0]));
+        preview.x.forEach((xm, i) => ctx.lineTo(esc.px(xm), esc.py(preview.y[i])));
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+
+        const alphaRad = radianes(alphaGrados);
+        dibujarCohete(esc, 0, 0, alphaRad);
+
+        document.getElementById('statTiempo').textContent = preview.t_vuelo.toFixed(2) + ' s';
+        document.getElementById('statAlcance').textContent = preview.x_vuelo.toFixed(2) + ' m';
+        document.getElementById('statAltura').textContent = preview.y_vuelo.toFixed(2) + ' m';
+    }
+
+    function actualizarLecturas() {
+        v0Value.textContent = v0Slider.value;
+        alphaValue.textContent = alphaSlider.value;
+        if (!volando) {
+            dibujarEscenaEstatica(parseFloat(v0Slider.value), parseFloat(alphaSlider.value));
+        }
+    }
+
+    const DURACION_ANIMACION = 2200; // ms — duración fija del vuelo animado, sin importar la física real
+
+    function iniciarLanzamiento() {
+        if (volando) return;
+        const v0 = parseFloat(v0Slider.value);
+        const alphaGrados = parseFloat(alphaSlider.value);
+        const trayectoria = calcularTrayectoria(v0, alphaGrados, N_MUESTRAS);
+
+        if (trayectoria.t_vuelo <= 0) {
+            alert('Elige un ángulo mayor que 0° para que el cohete despegue.');
+            return;
+        }
+
+        volando = true;
+        v0Slider.disabled = true;
+        alphaSlider.disabled = true;
+        launchBtn.disabled = true;
+        registrarBtn.disabled = true;
+        statusEl.textContent = '🚀 ¡Despegue! Observa la trayectoria...';
+
+        const esc = escalas(trayectoria.x_vuelo, trayectoria.y_vuelo);
+        let inicio = null;
+
+        function frame(timestamp) {
+            if (!inicio) inicio = timestamp;
+            const transcurrido = timestamp - inicio;
+            const fraccion = Math.min(transcurrido / DURACION_ANIMACION, 1);
+            const tFis = fraccion * trayectoria.t_vuelo;
+
+            // posición y velocidad instantánea (recalculadas para una animación suave)
+            const alphaRad = radianes(alphaGrados);
+            const xm = x0 + v0 * Math.cos(alphaRad) * tFis;
+            const ym = y0 + v0 * Math.sin(alphaRad) * tFis - 0.5 * g * tFis ** 2;
+            const vxIns = v0 * Math.cos(alphaRad);
+            const vyIns = v0 * Math.sin(alphaRad) - g * tFis;
+            const anguloVelocidad = Math.atan2(vyIns, vxIns);
+
+            // índice equivalente en el arreglo muestreado, para dibujar la estela ya recorrida
+            const indice = Math.min(Math.floor(fraccion * (trayectoria.t.length - 1)), trayectoria.t.length - 1);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            dibujarEjes(esc, trayectoria.x_vuelo, trayectoria.y_vuelo);
+            dibujarEstela(esc, trayectoria.x, trayectoria.y, indice);
+            dibujarCohete(esc, xm, ym, anguloVelocidad);
+
+            document.getElementById('statTiempo').textContent = tFis.toFixed(2) + ' s';
+            document.getElementById('statAlcance').textContent = Math.max(xm, 0).toFixed(2) + ' m';
+            document.getElementById('statAltura').textContent = Math.max(ym, 0).toFixed(2) + ' m';
+
+            if (fraccion < 1) {
+                animFrameId = requestAnimationFrame(frame);
+            } else {
+                // aterrizaje
+                dibujarEstela(esc, trayectoria.x, trayectoria.y, trayectoria.x.length - 1);
+                document.getElementById('statTiempo').textContent = trayectoria.t_vuelo.toFixed(2) + ' s';
+                document.getElementById('statAlcance').textContent = trayectoria.x_vuelo.toFixed(2) + ' m';
+                document.getElementById('statAltura').textContent = trayectoria.y_vuelo.toFixed(2) + ' m';
+
+                volando = false;
+                v0Slider.disabled = false;
+                alphaSlider.disabled = false;
+                launchBtn.disabled = false;
+                registrarBtn.disabled = false;
+                ultimaTrayectoria = trayectoria;
+                statusEl.textContent = `¡Aterrizó! Alcance = ${trayectoria.x_vuelo.toFixed(2)} m, altura máxima = ${trayectoria.y_vuelo.toFixed(2)} m. Puedes registrar la trayectoria o lanzar de nuevo.`;
+            }
+        }
+
+        animFrameId = requestAnimationFrame(frame);
+    }
+
+    function registrarTrayectoria() {
+        if (!ultimaTrayectoria) {
+            alert('Primero realiza un lanzamiento completo.');
+            return;
+        }
+        const d = ultimaTrayectoria;
+        const filas = ['t,x,y,vx,vy'];
+        for (let i = 0; i < d.t.length; i++) {
+            filas.push([
+                d.t[i].toFixed(5),
+                d.x[i].toFixed(5),
+                d.y[i].toFixed(5),
+                d.vx[i].toFixed(5),
+                d.vy[i].toFixed(5),
+            ].join(','));
+        }
+        const csv = filas.join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const nombreArchivo = `trayectoria_v0_${d.v0}_alpha_${d.alpha}.csv`;
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = nombreArchivo;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        statusEl.textContent = `Trayectoria registrada como "${nombreArchivo}". Súbela al notebook.`;
+    }
+
+    function reiniciarSimulacion() {
+        volando = false;
+        if (animFrameId) cancelAnimationFrame(animFrameId);
+        v0Slider.disabled = false;
+        alphaSlider.disabled = false;
+        v0Slider.value = 20;
+        alphaSlider.value = 45;
+        launchBtn.disabled = false;
+        registrarBtn.disabled = true;
+        ultimaTrayectoria = null;
+        statusEl.textContent = 'Ajusta las condiciones y presiona "Iniciar lanzamiento".';
+        actualizarLecturas();
+    }
+
+    v0Slider.addEventListener('input', actualizarLecturas);
+    alphaSlider.addEventListener('input', actualizarLecturas);
+    launchBtn.addEventListener('click', iniciarLanzamiento);
+    registrarBtn.addEventListener('click', registrarTrayectoria);
+    resetBtn.addEventListener('click', reiniciarSimulacion);
+
+    // Escena inicial
+    actualizarLecturas();
+</script>
+</body>
+</html>
