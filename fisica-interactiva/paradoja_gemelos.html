@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Paradoja de los Gemelos</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+<style>
+    :root {
+        --primary: #6c5ce7;
+        --primary-light: #a29bfe;
+        --accent: #009688;
+        --gold: #f5b74e;
+        --bg: #f8f9fa;
+        --card: #ffffff;
+        --text: #2d3436;
+        --muted: #636e72;
+        --success: #00b894;
+        --danger: #e74c3c;
+        --navy: #0b1120;
+    }
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .header { text-align: center; padding: 20px; background: var(--card); width: 100%; box-shadow: 0 2px 5px rgba(0,0,0,0.05); box-sizing: border-box; }
+    .header h2 { margin: 0; color: var(--primary); font-size: 2rem; }
+    .header p { color: var(--muted); margin: 8px 0 0; max-width: 750px; margin-left: auto; margin-right: auto; }
+    .container { width: 95%; max-width: 1050px; margin-top: 20px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+    @media (max-width: 850px) { .grid { grid-template-columns: 1fr; } }
+    .panel { background: var(--card); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    .panel h3 { margin-top: 0; }
+    label { font-weight: 600; margin-bottom: 8px; display: block; color: #555; }
+
+    input[type=number] { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-size: 1rem; }
+    .slider-row { margin-top: 16px; }
+    .slider-row input[type=range] { width: 100%; }
+    .slider-readout { text-align: center; font-family: 'Courier New', monospace; font-size: 1.05rem; color: var(--primary); font-weight: bold; margin-top: 6px; }
+
+    .stat-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+    .stat-cards div { background: #f1f0fd; border-radius: 8px; padding: 10px; text-align: center; }
+    .stat-cards strong { display: block; color: var(--primary); font-size: 1.15rem; }
+    .stat-cards span { font-size: 0.78rem; color: var(--muted); }
+
+    .controls-row { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+    button.action { border: none; padding: 12px 18px; font-size: 0.95rem; font-weight: bold; border-radius: 8px; cursor: pointer; color: white; flex: 1; min-width: 140px; transition: background 0.2s; }
+    .btn-primary { background: var(--primary); } .btn-primary:hover { background: #5a4bcf; }
+    .btn-accent { background: var(--accent); } .btn-accent:hover { background: #00786a; }
+    .btn-reset { background: #636e72; } .btn-reset:hover { background: #4b5254; }
+    .btn-export { background: var(--gold); color: #4a3300; } .btn-export:hover { background: #e0a835; }
+
+    #clocksWrap { display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 20px; }
+    .clock-block { text-align: center; }
+    .digital-clock {
+        background: var(--navy); color: var(--gold); font-family: 'Courier New', monospace;
+        font-size: 2.1rem; font-weight: bold; padding: 18px 10px; border-radius: 10px;
+        min-width: 140px; letter-spacing: 1px;
+    }
+    .digital-clock { margin-top: 8px; }
+    .clock-block p { font-weight: bold; margin: 8px 0 2px; }
+    .clock-block span { font-size: 0.8rem; color: var(--muted); }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { padding: 9px; text-align: center; border-bottom: 1px solid #eee; font-size: 0.85rem; }
+    th { background: #f1f0fd; color: var(--primary); }
+    tr:hover { background: #fafaff; }
+    .empty-row td { color: #b2bec3; font-style: italic; }
+
+    .footer { text-align: center; color: var(--muted); font-size: 1rem; margin: 10px 0 30px; }
+    .footer .bandera { font-size: 1.4em; }
+
+    .export-box { text-align: center; margin: 20px 0 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .export-box button { flex: none; min-width: 200px; }
+
+    #diagramaEspaciotiempo { width: 100%; height: 460px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h2>La Paradoja de los Gemelos</h2>
+    <p>Un gemelo viaja al espacio a velocidad cercana a la de la luz mientras su hermano se queda en la Tierra. Cuando el viajero regresa, ¡es más joven que su hermano! Ajusta la velocidad de la nave y descubre por qué la relatividad predice esto.</p>
+</div>
+
+<div class="container">
+
+    <div class="grid">
+        <div class="panel">
+            <h3>🚀 Configura el viaje</h3>
+            <label for="distanciaInput">Distancia a la estrella destino (años luz):</label>
+            <input type="number" id="distanciaInput" min="0.1" max="1000" step="0.1" value="4.24">
+
+            <div class="slider-row">
+                <label for="velSlider">Velocidad de la nave (fracción de la velocidad de la luz, v/c):</label>
+                <input type="range" id="velSlider" min="0.01" max="0.999" step="0.001" value="0.800">
+                <div class="slider-readout" id="velReadout">v = 0.800 c</div>
+            </div>
+
+            <div class="stat-cards">
+                <div><strong id="gammaVal">1.667</strong><span>Factor de Lorentz (γ)</span></div>
+                <div><strong id="velKms">239,800 km/s</strong><span>Velocidad en km/s</span></div>
+                <div><strong id="tTierraVal">3.18</strong><span>Años en la Tierra (viaje completo)</span></div>
+                <div><strong id="tNaveVal">1.91</strong><span>Años para el viajero (viaje completo)</span></div>
+            </div>
+
+            <p id="instruccionesConfig" style="color:var(--muted); font-size:0.85rem; margin-top:14px; display:none;">Ajusta la distancia a la estrella destino y la velocidad de la nave con el deslizador: el factor de Lorentz, la velocidad en km/s y los tiempos del viaje (arriba) se recalculan automáticamente. Luego pasa al panel de la derecha para ver el viaje animado y registrar el resultado.</p>
+        </div>
+
+        <div class="panel">
+            <h3>⏱ Relojes gemelos (tiempo numérico en vivo)</h3>
+            <p style="color:var(--muted); font-size:0.85rem; margin-top:-6px;">Presiona "Calcular y registrar viaje" y observa cómo el contador de la Tierra avanza más rápido que el de la nave, hasta completar el viaje.</p>
+            <div id="clocksWrap">
+                <div class="clock-block">
+                    <canvas id="clockTierra" width="140" height="140"></canvas>
+                    <div class="digital-clock" id="digitalTierra">0.00</div>
+                    <p>👨‍🚀 Gemelo en la Tierra</p>
+                    <span>años transcurridos</span>
+                </div>
+                <div class="clock-block">
+                    <canvas id="clockNave" width="140" height="140"></canvas>
+                    <div class="digital-clock" id="digitalNave">0.00</div>
+                    <p>🧑‍🚀 Gemelo viajero</p>
+                    <span id="tasaNave">años transcurridos</span>
+                </div>
+            </div>
+            <div class="controls-row">
+                <button class="action btn-primary" id="registrarBtn">🧮 Calcular y registrar viaje</button>
+                <button class="action btn-reset" id="resetClocksBtn">↺ Reiniciar relojes</button>
+            </div>
+            <p class="status" id="status" style="text-align:center; color:var(--muted); font-size:0.9rem;">Presiona "Calcular y registrar viaje": los relojes se moverán durante los segundos indicados en la distancia (años luz) y luego se detendrán.</p>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h3>Resultados registrados</h3>
+        <table id="tabla-datos">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Distancia (años luz)</th>
+                    <th>v/c</th>
+                    <th>Factor de Lorentz</th>
+                    <th>Tiempo en la Tierra (años)</th>
+                    <th>Tiempo en la nave (años)</th>
+                    <th>Diferencia de edad (años)</th>
+                </tr>
+            </thead>
+            <tbody id="tabla-body">
+                <tr class="empty-row"><td colspan="7">Aún no hay viajes registrados.</td></tr>
+            </tbody>
+        </table>
+        <div class="controls-row">
+            <button class="action btn-reset" id="deleteLastBtn">🗑 Borrar último registro</button>
+            <button class="action btn-reset" id="resetBtn">↺ Reiniciar tabla</button>
+        </div>
+    </div>
+
+    <div class="export-box">
+        <button class="action btn-export" id="exportBtn">📊 Exportar tabla a Excel</button>
+        <button class="action btn-accent" id="diagramaBtn">📈 Ver diagrama de espacio-tiempo</button>
+    </div>
+
+    <div class="panel" id="diagramaPanel" style="display:none;">
+        <h3>📈 Diagrama de espacio-tiempo</h3>
+        <p style="color:var(--muted); font-size:0.9rem;">Eje horizontal: posición (años luz). Eje vertical: tiempo medido desde la Tierra (años). Las líneas punteadas grises marcan la velocidad de la luz (imposible de alcanzar o superar).</p>
+        <div id="diagramaEspaciotiempo"></div>
+    </div>
+</div>
+
+<p class="footer">Elaborado por el Grupo de Física Computacional, cPhys+, de la Universidad Yachay Tech. <span class="bandera">🇪🇨</span></p>
+
+<script>
+    const c_kms = 299792.458; // velocidad de la luz en km/s
+    let datos = [];
+
+    const distanciaInput = document.getElementById('distanciaInput');
+    const velSlider = document.getElementById('velSlider');
+    const velReadout = document.getElementById('velReadout');
+    const gammaVal = document.getElementById('gammaVal');
+    const velKms = document.getElementById('velKms');
+    const tTierraVal = document.getElementById('tTierraVal');
+    const tNaveVal = document.getElementById('tNaveVal');
+
+    function gamma(v) { return 1 / Math.sqrt(1 - v * v); }
+
+    function calcularViaje() {
+        const v = parseFloat(velSlider.value);
+        const d = parseFloat(distanciaInput.value) || 0;
+        const g = gamma(v);
+        const tTierra = 2 * d / v; // años, marco de la Tierra (ida y vuelta)
+        const tNave = tTierra / g;  // años, marco propio de la nave
+        return { d, v, g, tTierra, tNave, diferencia: tTierra - tNave };
+    }
+
+    function actualizarLecturas() {
+        const v = parseFloat(velSlider.value);
+        const { g, tTierra, tNave } = calcularViaje();
+        const vKmh = (v * c_kms * 3600).toLocaleString('es-EC', { maximumFractionDigits: 0 });
+        velReadout.textContent = `v = ${v.toFixed(3)} c  =  ${vKmh} km/h`;
+        gammaVal.textContent = g.toFixed(3);
+        velKms.textContent = (v * c_kms).toLocaleString('es-EC', { maximumFractionDigits: 0 }) + ' km/s';
+        tTierraVal.textContent = tTierra.toFixed(2);
+        tNaveVal.textContent = tNave.toFixed(2);
+        dibujarDiagrama();
+    }
+    velSlider.addEventListener('input', actualizarLecturas);
+    distanciaInput.addEventListener('input', actualizarLecturas);
+
+    let diagramaVisible = false;
+
+    function dibujarDiagrama() {
+        if (!diagramaVisible) return; // no dibujamos hasta que el panel esté visible
+        const v = parseFloat(velSlider.value);
+        const d = parseFloat(distanciaInput.value) || 0;
+        const tIda = d / v;       // años (marco Tierra)
+        const tTotal = 2 * tIda;
+
+        const naveX = [0, d, 0];
+        const naveY = [0, tIda, tTotal];
+        const tierraX = [0, 0];
+        const tierraY = [0, tTotal];
+
+        const maxRango = Math.max(d, tTotal) * 1.15 + 0.5;
+        const luzX1 = [0, maxRango], luzY1 = [0, maxRango];
+        const luzX2 = [0, -maxRango], luzY2 = [0, maxRango];
+
+        const trazas = [
+            { x: luzX1, y: luzY1, mode: 'lines', line: { dash: 'dot', color: '#b2bec3', width: 1.5 }, name: 'Luz (c)', hoverinfo: 'skip' },
+            { x: luzX2, y: luzY2, mode: 'lines', line: { dash: 'dot', color: '#b2bec3', width: 1.5 }, showlegend: false, hoverinfo: 'skip' },
+            { x: tierraX, y: tierraY, mode: 'lines', line: { color: '#6c5ce7', width: 3 }, name: 'Gemelo en la Tierra' },
+            { x: naveX, y: naveY, mode: 'lines+markers', line: { color: '#e74c3c', width: 3 }, marker: { size: 7 }, name: 'Gemelo viajero' }
+        ];
+        const layout = {
+            xaxis: { title: 'Posición (años luz)', range: [-maxRango * 0.3, maxRango], zeroline: true },
+            yaxis: { title: 'Tiempo en el marco de la Tierra (años)', range: [0, maxRango] },
+            margin: { l: 60, r: 20, t: 20, b: 50 },
+            legend: { orientation: 'h', y: -0.2 },
+            plot_bgcolor: '#fafaff'
+        };
+        Plotly.newPlot('diagramaEspaciotiempo', trazas, layout, { responsive: true });
+    }
+
+    document.getElementById('registrarBtn').addEventListener('click', () => {
+        const d = parseFloat(distanciaInput.value);
+        if (!d || d <= 0) { alert('Ingresa una distancia válida.'); return; }
+
+        const calculo = calcularViaje();
+        datos.push(calculo);
+        renderTabla();
+        actualizarLecturas(); // refresca γ, km/h, km/s y los años del viaje (por si el usuario no disparó el evento del control)
+
+        document.getElementById('status').textContent =
+            `Registrado: para el gemelo en la Tierra pasan ${calculo.tTierra.toFixed(2)} años; para el viajero, solo ${calculo.tNave.toFixed(2)} años (diferencia de ${calculo.diferencia.toFixed(2)} años). Los relojes se mueven durante ${calculo.d.toFixed(2)} s y luego se detienen.`;
+
+        iniciarAnimacionRelojes(calculo);
+    });
+
+    function renderTabla() {
+        const tbody = document.getElementById('tabla-body');
+        if (datos.length === 0) {
+            tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Aún no hay viajes registrados.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = datos.map((r, i) => `
+            <tr>
+                <td>${i + 1}</td>
+                <td>${r.d.toFixed(2)}</td>
+                <td>${r.v.toFixed(3)}</td>
+                <td>${r.g.toFixed(3)}</td>
+                <td>${r.tTierra.toFixed(2)}</td>
+                <td>${r.tNave.toFixed(2)}</td>
+                <td>${r.diferencia.toFixed(2)}</td>
+            </tr>
+        `).join('');
+    }
+
+    document.getElementById('deleteLastBtn').addEventListener('click', () => {
+        if (datos.length === 0) return;
+        datos.pop();
+        renderTabla();
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        if (datos.length > 0 && !confirm('¿Borrar todos los viajes registrados?')) return;
+        datos = [];
+        renderTabla();
+    });
+
+    document.getElementById('exportBtn').addEventListener('click', () => {
+        if (datos.length === 0) { alert('No hay datos para exportar. Calcula al menos un viaje.'); return; }
+        const filas = datos.map((r, i) => ({
+            '#': i + 1,
+            'Distancia (años luz)': Number(r.d.toFixed(3)),
+            'v/c': Number(r.v.toFixed(4)),
+            'Factor de Lorentz (γ)': Number(r.g.toFixed(4)),
+            'Tiempo en la Tierra (años)': Number(r.tTierra.toFixed(3)),
+            'Tiempo en la nave (años)': Number(r.tNave.toFixed(3)),
+            'Diferencia de edad (años)': Number(r.diferencia.toFixed(3))
+        }));
+        const hoja = XLSX.utils.json_to_sheet(filas);
+        const libro = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(libro, hoja, 'Paradoja Gemelos');
+        XLSX.writeFile(libro, 'datos_paradoja_gemelos.xlsx');
+    });
+
+    document.getElementById('diagramaBtn').addEventListener('click', () => {
+        const panel = document.getElementById('diagramaPanel');
+        diagramaVisible = true;
+        panel.style.display = 'block';
+        dibujarDiagrama();
+        panel.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // --- Relojes gemelos: esfera redonda + número en vivo, ligados al viaje calculado ---
+    const ctxTierra = document.getElementById('clockTierra').getContext('2d');
+    const ctxNave = document.getElementById('clockNave').getContext('2d');
+    const digitalTierra = document.getElementById('digitalTierra');
+    const digitalNave = document.getElementById('digitalNave');
+
+    let anguloTierra = 0, anguloNave = 0;
+    let aniosTierra = 0, aniosNave = 0;
+    let corriendo = false;
+    let ultimoTiempo = null;
+
+    // Parámetros de la corrida activa: se fijan cada vez que se presiona "Calcular y registrar viaje".
+    // Los relojes se mueven durante tantos segundos reales como años luz de distancia se ingresaron.
+    let activo = { duracionSeg: 0, tTierra: 0, tNave: 0, gamma: 1 };
+
+    function dibujarReloj(ctx, angulo, colorManecilla) {
+        const w = ctx.canvas.width, h = ctx.canvas.height;
+        const r = w / 2 - 8;
+        ctx.clearRect(0, 0, w, h);
+        ctx.beginPath();
+        ctx.arc(w / 2, h / 2, r, 0, 2 * Math.PI);
+        ctx.fillStyle = '#0b1120';
+        ctx.fill();
+        ctx.strokeStyle = '#a29bfe';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        // marcas
+        for (let i = 0; i < 12; i++) {
+            const a = (i / 12) * 2 * Math.PI;
+            const x1 = w / 2 + Math.cos(a) * (r - 6), y1 = h / 2 + Math.sin(a) * (r - 6);
+            const x2 = w / 2 + Math.cos(a) * r, y2 = h / 2 + Math.sin(a) * r;
+            ctx.strokeStyle = '#636e72';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+        }
+        // manecilla
+        const x = w / 2 + Math.cos(angulo - Math.PI / 2) * (r - 15);
+        const y = h / 2 + Math.sin(angulo - Math.PI / 2) * (r - 15);
+        ctx.strokeStyle = colorManecilla;
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(w / 2, h / 2); ctx.lineTo(x, y); ctx.stroke();
+        ctx.fillStyle = colorManecilla;
+        ctx.beginPath(); ctx.arc(w / 2, h / 2, 4, 0, 2 * Math.PI); ctx.fill();
+    }
+
+    function animar(tiempoActual) {
+        if (!corriendo) return;
+        if (ultimoTiempo === null) ultimoTiempo = tiempoActual;
+        const dt = (tiempoActual - ultimoTiempo) / 1000;
+        ultimoTiempo = tiempoActual;
+
+        const { duracionSeg, tTierra, tNave, gamma: g } = activo;
+
+        // ritmo (años simulados por segundo real) fijado al calcular el viaje:
+        // el viaje completo dura tantos segundos reales como años luz de distancia se ingresaron
+        const ritmoTierra = tTierra / duracionSeg;
+        const ritmoNave = tNave / duracionSeg; // = ritmoTierra / g
+
+        aniosTierra = Math.min(aniosTierra + ritmoTierra * dt, tTierra);
+        aniosNave = Math.min(aniosNave + ritmoNave * dt, tNave);
+
+        anguloTierra += (Math.PI / 2) * dt;
+        anguloNave += (Math.PI / 2 / g) * dt; // la esfera de la nave gira más lento, en la misma proporción que γ
+
+        dibujarReloj(ctxTierra, anguloTierra, '#a29bfe');
+        dibujarReloj(ctxNave, anguloNave, '#e74c3c');
+        digitalTierra.textContent = aniosTierra.toFixed(2);
+        digitalNave.textContent = aniosNave.toFixed(2);
+
+        document.getElementById('tasaNave').textContent =
+            `avanza ${(1 / g).toFixed(2)}x más lento que el de la Tierra`;
+
+        if (aniosTierra >= tTierra) {
+            // el viaje terminó: los relojes se detienen automáticamente
+            corriendo = false;
+            document.getElementById('instruccionesConfig').style.display = 'block';
+            return;
+        }
+
+        requestAnimationFrame(animar);
+    }
+
+    function iniciarAnimacionRelojes(calculo) {
+        activo = { duracionSeg: calculo.d, tTierra: calculo.tTierra, tNave: calculo.tNave, gamma: calculo.g };
+        anguloTierra = 0;
+        anguloNave = 0;
+        aniosTierra = 0;
+        aniosNave = 0;
+        corriendo = true;
+        ultimoTiempo = null;
+        document.getElementById('instruccionesConfig').style.display = 'none';
+        requestAnimationFrame(animar);
+    }
+
+    document.getElementById('resetClocksBtn').addEventListener('click', () => {
+        corriendo = false;
+        ultimoTiempo = null;
+        anguloTierra = 0;
+        anguloNave = 0;
+        aniosTierra = 0;
+        aniosNave = 0;
+        document.getElementById('instruccionesConfig').style.display = 'none';
+        dibujarReloj(ctxTierra, 0, '#a29bfe');
+        dibujarReloj(ctxNave, 0, '#e74c3c');
+        digitalTierra.textContent = '0.00';
+        digitalNave.textContent = '0.00';
+    });
+
+    // Inicialización
+    dibujarReloj(ctxTierra, 0, '#a29bfe');
+    dibujarReloj(ctxNave, 0, '#e74c3c');
+    actualizarLecturas();
+</script>
+</body>
+</html>

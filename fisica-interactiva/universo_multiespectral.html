@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>El Universo en Distintas Longitudes de Onda</title>
+<style>
+    :root {
+        --primary: #6c5ce7;
+        --primary-light: #a29bfe;
+        --accent: #009688;
+        --gold: #f5b74e;
+        --bg: #f8f9fa;
+        --card: #ffffff;
+        --text: #2d3436;
+        --muted: #636e72;
+        --success: #00b894;
+        --danger: #e74c3c;
+        --navy: #0b1120;
+    }
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .header {
+        text-align: center;
+        padding: 20px;
+        background: var(--card);
+        width: 100%;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        box-sizing: border-box;
+    }
+    .header h2 { margin: 0; color: var(--primary); font-size: 2rem; }
+    .header p { color: var(--muted); margin: 8px 0 0; max-width: 750px; margin-left: auto; margin-right: auto; }
+    .container { width: 95%; max-width: 1050px; margin-top: 20px; }
+    .panel { background: var(--card); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    .panel h3 { margin-top: 0; }
+
+    /* --- visor principal --- */
+    #imgWrap { position: relative; background: var(--navy); border-radius: 10px; overflow: hidden; text-align: center; }
+    #imgWrap img { width: 100%; max-height: 480px; object-fit: contain; display: block; margin: 0 auto; background: #000; }
+    .badge-banda {
+        position: absolute; top: 14px; left: 14px; padding: 6px 14px; border-radius: 20px;
+        font-weight: bold; font-size: 0.9rem; color: white; background: var(--primary);
+    }
+
+    .slider-row { margin-top: 18px; }
+    .slider-row input[type=range] { width: 100%; }
+    .banda-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+
+    /* --- espectro EM --- */
+    #espectro { width: 100%; height: 70px; margin-top: 14px; }
+
+    .info-banda { background: #f1f0fd; border-radius: 10px; padding: 14px 18px; margin-top: 16px; }
+    .info-banda h4 { margin: 0 0 6px; color: var(--primary); }
+    .info-banda p { margin: 0; color: #555; font-size: 0.92rem; line-height: 1.5; }
+    .info-banda .meta { margin-top: 8px; font-size: 0.8rem; color: var(--muted); }
+
+    /* --- comparador antes/despues --- */
+    .compare-selectors { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+    .compare-selectors select { flex: 1; min-width: 160px; padding: 8px; border-radius: 6px; border: 1px solid #ddd; font-size: 0.9rem; }
+    #compareWrap {
+        position: relative; width: 100%; aspect-ratio: 1 / 1; max-height: 480px; margin: 0 auto;
+        border-radius: 10px; overflow: hidden; background: var(--navy); user-select: none;
+    }
+    #compareWrap img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; background:#000; }
+    #imgTop { clip-path: inset(0 50% 0 0); }
+    #dividerHandle {
+        position: absolute; top: 0; bottom: 0; left: 50%; width: 4px; background: var(--gold);
+        cursor: ew-resize; transform: translateX(-2px);
+    }
+    #dividerHandle::after {
+        content: "⇔"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        background: var(--gold); color: #4a3300; width: 34px; height: 34px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    .compare-caption { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--muted); margin-top: 8px; }
+
+    .footer { text-align: center; color: var(--muted); font-size: 1rem; margin: 10px 0 30px; }
+    .footer .bandera { font-size: 1.4em; }
+
+    .object-meta {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 6px;
+    }
+    .object-meta div { background: #fafaff; border-radius: 8px; padding: 10px; text-align: center; }
+    .object-meta strong { display: block; color: var(--primary); font-size: 0.95rem; }
+    .object-meta span { font-size: 0.78rem; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h2>El Universo en Distintas Longitudes de Onda</h2>
+    <p>La luz visible es solo una pequeñísima parte del espectro electromagnético. Los telescopios modernos observan en radio, infrarrojo, ultravioleta y rayos X para revelar cosas que el ojo humano jamás podría ver. Exploremos la <strong>Nebulosa del Cangrejo</strong> (M1), el remanente de una explosión de supernova observada en el año 1054, en cinco longitudes de onda distintas.</p>
+</div>
+
+<div class="container">
+
+    <div class="panel">
+        <h3>🔭 Objeto observado: Nebulosa del Cangrejo (M1 / NGC 1952)</h3>
+        <div class="object-meta">
+            <div><strong>Constelación</strong><span>Tauro</span></div>
+            <div><strong>Distancia</strong><span>6,500 años luz</span></div>
+            <div><strong>Ascensión recta</strong><span>05h 34m 31.9s</span></div>
+            <div><strong>Declinación</strong><span>+22° 00' 52"</span></div>
+            <div><strong>Origen</strong><span>Supernova del año 1054</span></div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h3>Visor: desliza para cambiar de longitud de onda</h3>
+        <div id="imgWrap">
+            <span class="badge-banda" id="badgeBanda">Visible</span>
+            <img id="mainImg" src="" alt="Nebulosa del Cangrejo">
+        </div>
+
+        <div class="slider-row">
+            <input type="range" id="bandaSlider" min="0" max="4" step="1" value="2">
+            <div class="banda-labels">
+                <span>📻 Radio</span>
+                <span>🌡 Infrarrojo</span>
+                <span>👁 Visible</span>
+                <span>🔆 Ultravioleta</span>
+                <span>☢ Rayos X</span>
+            </div>
+        </div>
+
+        <svg id="espectro" viewBox="0 0 700 70"></svg>
+
+        <div class="info-banda">
+            <h4 id="infoTitulo">Luz Visible</h4>
+            <p id="infoTexto"></p>
+            <div class="meta" id="infoMeta"></div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h3>🔀 Comparador: desliza la línea para revelar cada banda</h3>
+        <div class="compare-selectors">
+            <select id="selA"></select>
+            <select id="selB"></select>
+        </div>
+        <div id="compareWrap">
+            <img id="imgBottom" src="">
+            <img id="imgTop" src="">
+            <div id="dividerHandle"></div>
+        </div>
+        <div class="compare-caption">
+            <span id="capA">Izquierda</span>
+            <span id="capB">Derecha</span>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h3>🎨 Composición a color (todas las bandas juntas)</h3>
+        <p style="color:var(--muted); font-size:0.9rem;">Los astrónomos combinan varias bandas asignándoles colores artificiales para crear una sola imagen que resalta distintas estructuras físicas a la vez.</p>
+        <div id="imgWrapComposite" style="background:var(--navy); border-radius:10px; overflow:hidden; text-align:center;">
+            <img id="compositeImg" src="https://assets.science.nasa.gov/dynamicimage/assets/science/missions/hubble/releases/2017/05/STScI-01EVVBEP6SA3MK40QW7JRTFA6V.tif?w=800&h=800&fit=clip" style="width:100%; max-height:480px; object-fit:contain;">
+        </div>
+    </div>
+
+    <div class="panel">
+        <h3>📷 Créditos de las imágenes</h3>
+        <p style="color:var(--muted); font-size:0.85rem;">Todas las imágenes pertenecen al comunicado de prensa "Observatories Combine to Crack Open the Crab Nebula" (NASA, 10 de mayo de 2017), que combina datos de cinco telescopios distintos.</p>
+        <table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
+            <thead>
+                <tr style="background:#f1f0fd; color:var(--primary);">
+                    <th style="padding:8px; text-align:left;">Banda</th>
+                    <th style="padding:8px; text-align:left;">Crédito</th>
+                    <th style="padding:8px; text-align:left;">Fuente</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom:1px solid #eee;">
+                    <td style="padding:8px;">📻 Radio</td>
+                    <td style="padding:8px;">NASA / VLA / NRAO / AUI / NSF</td>
+                    <td style="padding:8px;"><a href="https://science.nasa.gov/asset/hubble/very-large-array-radio-image-of-the-crab-nebula/" target="_blank" rel="noopener">science.nasa.gov ↗</a></td>
+                </tr>
+                <tr style="border-bottom:1px solid #eee;">
+                    <td style="padding:8px;">🌡 Infrarrojo</td>
+                    <td style="padding:8px;">NASA / Spitzer / JPL-Caltech</td>
+                    <td style="padding:8px;"><a href="https://science.nasa.gov/asset/hubble/spitzer-space-telescope-infrared-image-of-the-crab-nebula/" target="_blank" rel="noopener">science.nasa.gov ↗</a></td>
+                </tr>
+                <tr style="border-bottom:1px solid #eee;">
+                    <td style="padding:8px;">👁 Visible</td>
+                    <td style="padding:8px;">NASA / ESA / Hubble / STScI</td>
+                    <td style="padding:8px;"><a href="https://science.nasa.gov/asset/hubble/hubble-space-telescope-visible-image-of-the-crab-nebula/" target="_blank" rel="noopener">science.nasa.gov ↗</a></td>
+                </tr>
+                <tr style="border-bottom:1px solid #eee;">
+                    <td style="padding:8px;">🔆 Ultravioleta</td>
+                    <td style="padding:8px;">NASA / ESA / XMM-Newton</td>
+                    <td style="padding:8px;"><a href="https://science.nasa.gov/asset/hubble/xmm-newton-ultraviolet-image-of-the-crab-nebula/" target="_blank" rel="noopener">science.nasa.gov ↗</a></td>
+                </tr>
+                <tr style="border-bottom:1px solid #eee;">
+                    <td style="padding:8px;">☢ Rayos X</td>
+                    <td style="padding:8px;">NASA / CXC / Chandra X-ray Observatory</td>
+                    <td style="padding:8px;"><a href="https://science.nasa.gov/asset/hubble/chandra-x-ray-observatory-x-ray-image-of-the-crab-nebula/" target="_blank" rel="noopener">science.nasa.gov ↗</a></td>
+                </tr>
+                <tr>
+                    <td style="padding:8px;">🎨 Composición a color</td>
+                    <td style="padding:8px;">NASA, ESA, G. Dubner (IAFE, CONICET–Univ. de Buenos Aires) et al.; A. Loll et al.; T. Temim et al.; F. Seward et al.; VLA/NRAO/AUI/NSF; Chandra/CXC; Spitzer/JPL-Caltech; XMM-Newton/ESA; Hubble/STScI</td>
+                    <td style="padding:8px;"><a href="https://science.nasa.gov/asset/hubble/multiwavelength-crab-nebula/" target="_blank" rel="noopener">science.nasa.gov ↗</a></td>
+                </tr>
+            </tbody>
+        </table>
+        <p style="color:var(--muted); font-size:0.8rem; margin-top:10px;">Comunicado de prensa completo: <a href="https://science.nasa.gov/missions/hubble/observatories-combine-to-crack-open-the-crab-nebula/" target="_blank" rel="noopener">Observatories Combine to Crack Open the Crab Nebula (NASA, 2017) ↗</a></p>
+    </div>
+
+</div>
+
+<p class="footer">Elaborado por el Grupo de Física Computacional, cPhys+, de la Universidad Yachay Tech. <span class="bandera">🇪🇨</span></p>
+
+<script>
+    // Imágenes reales de la Nebulosa del Cangrejo, comunicado NASA (mayo 2017)
+    const bandas = [
+        {
+            id: "radio",
+            nombre: "Radio",
+            emoji: "📻",
+            url: "https://assets.science.nasa.gov/dynamicimage/assets/science/missions/hubble/releases/2017/05/STScI-01EVVBE2DY6HH2H49WT0VEBC85.tif?w=800&h=800&fit=clip",
+            telescopio: "VLA (Very Large Array)",
+            longitud: "~ 1 - 400 mm (ondas de radio)",
+            texto: "Las ondas de radio revelan electrones de altísima energía moviéndose en espiral alrededor de líneas de campo magnético (radiación sincrotrón). Muestran la estructura del 'viento' de partículas que produce el púlsar en el centro de la nebulosa."
+        },
+        {
+            id: "infrarrojo",
+            nombre: "Infrarrojo",
+            emoji: "🌡",
+            url: "https://assets.science.nasa.gov/dynamicimage/assets/science/missions/hubble/releases/2017/05/STScI-01EVVBD2HMHDWH46WT96MQR8XA.tif?w=800&h=800&fit=clip",
+            telescopio: "Spitzer Space Telescope",
+            longitud: "~ 1 - 15 micrómetros",
+            texto: "El infrarrojo atraviesa el polvo cósmico y revela el calor de granos de polvo mezclados con los filamentos de gas. Es clave para ver estructuras ocultas por nubes de material."
+        },
+        {
+            id: "visible",
+            nombre: "Visible",
+            emoji: "👁",
+            url: "https://assets.science.nasa.gov/dynamicimage/assets/science/missions/hubble/releases/2017/05/STScI-01EVVBDBRVWMKBN234SXQ1MEA1.tif?w=800&h=800&fit=clip",
+            telescopio: "Hubble Space Telescope",
+            longitud: "~ 400 - 700 nanómetros",
+            texto: "Es lo que vería el ojo humano (con un telescopio muy potente): filamentos brillantes de gas ionizado, principalmente hidrógeno y oxígeno, calentados por la onda de choque de la explosión."
+        },
+        {
+            id: "ultravioleta",
+            nombre: "Ultravioleta",
+            emoji: "🔆",
+            url: "https://assets.science.nasa.gov/dynamicimage/assets/science/missions/hubble/releases/2017/05/STScI-01EVVBDF6H7WT5PZPG9REY0Q39.tif?w=800&h=800&fit=clip",
+            telescopio: "XMM-Newton",
+            longitud: "~ 10 - 400 nanómetros",
+            texto: "El ultravioleta traza gas mucho más caliente que el visible, típicamente calentado por radiación energética cerca de la fuente central. Ayuda a mapear zonas de choque de muy alta temperatura."
+        },
+        {
+            id: "rayosx",
+            nombre: "Rayos X",
+            emoji: "☢",
+            url: "https://assets.science.nasa.gov/dynamicimage/assets/science/missions/hubble/releases/2017/05/STScI-01EVVBDXTSA7EWBWN777Z9PMHG.tif?w=800&h=800&fit=clip",
+            telescopio: "Chandra X-ray Observatory",
+            longitud: "~ 0.01 - 10 nanómetros",
+            texto: "Los rayos X muestran el gas más energético de todos, calentado a millones de grados por el púlsar central (una estrella de neutrones giratoria) y su potente viento de partículas. Solo se puede observar desde el espacio, ya que la atmósfera terrestre los bloquea."
+        }
+    ];
+
+    const slider = document.getElementById('bandaSlider');
+    const mainImg = document.getElementById('mainImg');
+    const badgeBanda = document.getElementById('badgeBanda');
+    const infoTitulo = document.getElementById('infoTitulo');
+    const infoTexto = document.getElementById('infoTexto');
+    const infoMeta = document.getElementById('infoMeta');
+
+    function actualizarVisor() {
+        const b = bandas[parseInt(slider.value)];
+        mainImg.src = b.url;
+        mainImg.alt = "Nebulosa del Cangrejo en " + b.nombre;
+        badgeBanda.textContent = b.emoji + " " + b.nombre;
+        infoTitulo.textContent = b.emoji + " " + b.nombre;
+        infoTexto.textContent = b.texto;
+        infoMeta.textContent = "Telescopio: " + b.telescopio + "  •  Longitud de onda: " + b.longitud;
+        dibujarEspectro(parseInt(slider.value));
+    }
+    slider.addEventListener('input', actualizarVisor);
+
+    // --- diagrama del espectro EM ---
+    function dibujarEspectro(indiceActivo) {
+        const svg = document.getElementById('espectro');
+        const W = 700, H = 70;
+        const colores = ["#7d5fff", "#e74c3c", "#00b894", "#8e44ff", "#b2bec3"];
+        // orden de dibujo: radio(largo)->rayosX(corto), pero el gradiente visual va de izq(radio) a der(rayosX)
+        let svgContent = `<defs>
+            <linearGradient id="gradEspectro" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#7d5fff"/>
+                <stop offset="25%" stop-color="#e74c3c"/>
+                <stop offset="50%" stop-color="#00b894"/>
+                <stop offset="70%" stop-color="#6c5ce7"/>
+                <stop offset="100%" stop-color="#2d3436"/>
+            </linearGradient>
+        </defs>`;
+        svgContent += `<rect x="10" y="25" width="${W-20}" height="16" rx="8" fill="url(#gradEspectro)" opacity="0.85"/>`;
+        const posiciones = [10, 0.25*(W-20)+10, 0.5*(W-20)+10, 0.7*(W-20)+10, W-10];
+        bandas.forEach((b, i) => {
+            const x = posiciones[i];
+            const activo = i === indiceActivo;
+            svgContent += `<circle cx="${x}" cy="33" r="${activo ? 9 : 5}" fill="${activo ? '#f5b74e' : '#ffffff'}" stroke="#2d3436" stroke-width="1.5"/>`;
+            svgContent += `<text x="${x}" y="60" font-size="11" text-anchor="middle" fill="${activo ? '#f5b74e' : '#636e72'}" font-weight="${activo ? 'bold' : 'normal'}">${b.emoji}</text>`;
+        });
+        svgContent += `<text x="10" y="15" font-size="10" fill="#636e72">longitud de onda larga</text>`;
+        svgContent += `<text x="${W-10}" y="15" font-size="10" fill="#636e72" text-anchor="end">longitud de onda corta</text>`;
+        svg.innerHTML = svgContent;
+    }
+
+    // --- comparador antes/despues ---
+    const selA = document.getElementById('selA');
+    const selB = document.getElementById('selB');
+    const imgTop = document.getElementById('imgTop');
+    const imgBottom = document.getElementById('imgBottom');
+    const capA = document.getElementById('capA');
+    const capB = document.getElementById('capB');
+    const dividerHandle = document.getElementById('dividerHandle');
+    const compareWrap = document.getElementById('compareWrap');
+
+    bandas.forEach((b, i) => {
+        const optA = document.createElement('option');
+        optA.value = i; optA.textContent = b.emoji + " " + b.nombre;
+        selA.appendChild(optA);
+        const optB = document.createElement('option');
+        optB.value = i; optB.textContent = b.emoji + " " + b.nombre;
+        selB.appendChild(optB);
+    });
+    selA.value = 4; // rayos X
+    selB.value = 2; // visible
+
+    function actualizarComparador() {
+        const bA = bandas[parseInt(selA.value)];
+        const bB = bandas[parseInt(selB.value)];
+        imgTop.src = bA.url;
+        imgBottom.src = bB.url;
+        capA.textContent = bA.emoji + " " + bA.nombre;
+        capB.textContent = bB.emoji + " " + bB.nombre;
+    }
+    selA.addEventListener('change', actualizarComparador);
+    selB.addEventListener('change', actualizarComparador);
+
+    let arrastrando = false;
+    function moverDivisor(clientX) {
+        const rect = compareWrap.getBoundingClientRect();
+        let pct = ((clientX - rect.left) / rect.width) * 100;
+        pct = Math.max(0, Math.min(100, pct));
+        dividerHandle.style.left = pct + "%";
+        imgTop.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
+    }
+    dividerHandle.addEventListener('mousedown', () => arrastrando = true);
+    window.addEventListener('mouseup', () => arrastrando = false);
+    window.addEventListener('mousemove', (e) => { if (arrastrando) moverDivisor(e.clientX); });
+    dividerHandle.addEventListener('touchstart', () => arrastrando = true);
+    window.addEventListener('touchend', () => arrastrando = false);
+    window.addEventListener('touchmove', (e) => { if (arrastrando) moverDivisor(e.touches[0].clientX); });
+    compareWrap.addEventListener('click', (e) => moverDivisor(e.clientX));
+
+    // Inicialización
+    actualizarVisor();
+    actualizarComparador();
+</script>
+</body>
+</html>
