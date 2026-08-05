@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Maquinita Binaria · Suma de verdad en binario</title>
+<style>
+  :root {
+    --ink:#0B1026; --card:#12203B; --card2:#16294A; --line:#274a6b;
+    --gold:#D8B25C; --cyan:#7ED4E8; --green:#5BD68A; --coral:#E8747C; --mut:#93A7C0;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family: Arial, Helvetica, sans-serif; color:#EAF6FF; min-height:100vh;
+    background: radial-gradient(1100px 560px at 85% -10%, #0E4D46 0%, transparent 60%),
+                radial-gradient(900px 520px at 8% 110%, #123B5C 0%, transparent 60%),
+                linear-gradient(180deg, #050D18 0%, #0B1E33 55%, #0E2A40 100%);
+    overflow-x:hidden;
+  }
+  .stars { position:fixed; inset:0; pointer-events:none; z-index:0; }
+  .wrap { position:relative; z-index:1; max-width:1100px; margin:0 auto; padding:26px 20px 60px; }
+  h1 { text-align:center; font-size:29px; letter-spacing:4px; color:var(--green); margin-bottom:4px; }
+  .sub { text-align:center; color:var(--mut); margin-bottom:22px; font-size:15px; }
+  .panel { background:rgba(18,32,59,.84); border:1px solid var(--line); border-radius:16px;
+           padding:16px 20px; margin-bottom:16px; box-shadow:0 8px 24px rgba(0,0,0,.5); }
+  .row { display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:center; }
+  label { color:var(--mut); font-size:14px; }
+  input[type=number], input[type=text] { font-size:20px; font-weight:bold; text-align:center; padding:8px;
+    background:var(--ink); color:var(--green); border:2px solid var(--line); border-radius:10px; }
+  input[type=number] { width:72px; }
+  .binlabel { font-size:13px; color:var(--cyan); text-align:center; min-width:72px; font-weight:bold; }
+  button { cursor:pointer; font-size:15px; font-weight:bold; padding:10px 16px; border-radius:10px;
+    border:2px solid var(--line); background:var(--card2); color:#EAF6FF; transition:.15s; letter-spacing:.4px; }
+  button:hover { transform:translateY(-2px); border-color:var(--green); }
+  button.primary { background:var(--green); color:#06121F; border-color:var(--green); }
+  button.gold { background:var(--gold); color:#06121F; border-color:var(--gold); }
+  input[type=range]{ accent-color: var(--green); width:130px; }
+  /* tape */
+  .tapebox { overflow-x:auto; padding:52px 8px 12px; }
+  .tape { display:flex; gap:5px; justify-content:center; min-width:fit-content; margin:0 auto; }
+  .cell { width:52px; height:52px; border-radius:10px; background:var(--card2); border:2px solid var(--line);
+    display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:bold; color:#4A5F7E;
+    position:relative; flex:0 0 auto; font-family:"Courier New", monospace; }
+  .cell.d1 { color:var(--gold); } .cell.d0 { color:#C9DAF0; } .cell.plus { color:var(--coral); }
+  .cell.head { border-color:var(--green); background:#173B33; box-shadow:0 0 16px rgba(91,214,138,.4); }
+  .cell.head::before { content:"▼"; position:absolute; top:-28px; left:50%; transform:translateX(-50%);
+    color:var(--green); font-size:18px; }
+  .cell.head::after { content:attr(data-state); position:absolute; top:-54px; left:50%; transform:translateX(-50%);
+    color:var(--green); font-size:13px; font-weight:bold; background:var(--ink); border:1.5px solid var(--green);
+    padding:2px 8px; border-radius:8px; }
+  .statusline { text-align:center; margin-top:10px; font-size:15px; color:var(--mut); min-height:22px; }
+  .statusline b { color:var(--green); }
+  .counter { display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-top:10px; }
+  .chip { background:var(--ink); border:1.5px solid var(--line); border-radius:10px; padding:7px 14px; font-size:13.5px; color:var(--mut); }
+  .chip b { color:#EAF6FF; font-size:17px; }
+  .chip b.a { color:var(--gold); } .chip b.b { color:var(--cyan); }
+  .cols { display:grid; grid-template-columns: 1.3fr 1fr; gap:16px; }
+  @media (max-width:860px){ .cols { grid-template-columns:1fr; } }
+  h3.sec { letter-spacing:2px; font-size:15px; text-align:center; margin-bottom:10px; }
+  /* phases */
+  .phase { display:flex; gap:10px; align-items:center; padding:6px 10px; border-radius:9px; margin-bottom:4px;
+    font-size:13.5px; color:var(--mut); border:1px solid transparent; }
+  .phase b { color:var(--cyan); width:30px; flex:0 0 auto; font-size:15px; }
+  .phase.active { background:rgba(91,214,138,.12); border-color:var(--green); color:#EAF6FF; }
+  .phase.active b { color:var(--green); }
+  table { width:100%; border-collapse:collapse; font-size:13px; margin-top:8px; }
+  th, td { padding:5px 6px; text-align:center; border-bottom:1px solid var(--line); }
+  th { color:var(--mut); font-size:11px; letter-spacing:1px; }
+  td b.q{color:var(--cyan);} td b.s{color:var(--gold);} td b.m{color:var(--green);} td b.p{color:var(--coral);}
+  tr.active { background:rgba(216,178,92,.15); outline:2px solid var(--gold); }
+  .reto { border-color:var(--gold); }
+  .reto h3 { color:var(--gold); }
+  .reto p { color:var(--mut); font-size:13.5px; text-align:center; margin-bottom:10px; }
+  .msg { text-align:center; font-weight:bold; font-size:16px; min-height:24px; margin-top:8px; }
+  .msg.win { color:var(--green); } .msg.lose { color:var(--coral); }
+  .halt { animation:pulse 1s ease infinite alternate; }
+  @keyframes pulse { from{box-shadow:0 0 6px rgba(216,178,92,.3);} to{box-shadow:0 0 24px rgba(216,178,92,.85);} }
+  .strategy { text-align:center; color:var(--mut); font-size:14px; margin-top:2px; }
+  .strategy b { color:var(--gold); }
+  footer { text-align:center; color:#40587a; font-size:12.5px; margin-top:24px; }
+</style>
+</head>
+<body>
+<canvas class="stars" id="sky"></canvas>
+<div class="wrap">
+  <h1>⚙ LA MAQUINITA BINARIA</h1>
+  <div class="sub">Suma de verdad, en el idioma de las computadoras: <b style="color:var(--gold)">0</b> y <b style="color:var(--gold)">1</b>.</div>
+
+  <div class="panel">
+    <div class="row">
+      <div>
+        <div class="row" style="gap:6px"><label>Primer número</label><input type="number" id="numA" min="0" max="15" value="5"></div>
+        <div class="binlabel" id="binA">5 = 101₂</div>
+      </div>
+      <span style="color:var(--coral);font-size:24px;font-weight:bold">+</span>
+      <div>
+        <div class="row" style="gap:6px"><label>Segundo número</label><input type="number" id="numB" min="0" max="15" value="3"></div>
+        <div class="binlabel" id="binB">3 = 11₂</div>
+      </div>
+      <button class="primary" id="btnLoad">Cargar cinta</button>
+      <button id="btnStep">Paso ▸</button>
+      <button class="gold" id="btnRun">Auto ▶▶</button>
+      <button id="btnReset">⟲</button>
+      <div style="text-align:center"><label>Velocidad</label><br><input type="range" id="speed" min="20" max="500" value="160"></div>
+    </div>
+    <div class="strategy">Estrategia: en cada vuelta <b>resta 1</b> al segundo número y <b>suma 1</b> al primero. Cuando el segundo llega a 0… ¡solo queda la suma!</div>
+  </div>
+
+  <div class="panel">
+    <div class="tapebox"><div class="tape" id="tape"></div></div>
+    <div class="statusline" id="status">Elige dos números (0–15) y pulsa <b>Cargar cinta</b>.</div>
+    <div class="counter">
+      <div class="chip">Pasos: <b id="steps">0</b></div>
+      <div class="chip">Estado: <b id="stateChip">q0</b></div>
+      <div class="chip">Izquierda del + : <b class="a" id="valA">–</b></div>
+      <div class="chip">Derecha del + : <b class="b" id="valB">–</b></div>
+    </div>
+  </div>
+
+  <div class="cols">
+    <div class="panel">
+      <h3 class="sec" style="color:var(--cyan)">PROGRAMA · 6 estados</h3>
+      <div id="phases">
+        <div class="phase" id="ph_q0"><b>q0</b> Ir hasta el final de la cinta</div>
+        <div class="phase" id="ph_q1"><b>q1</b> Restar 1 al de la derecha: buscar su último 1 (si solo hay 0s → terminar)</div>
+        <div class="phase" id="ph_q2"><b>q2</b> Completar la resta: los 0s que pasé se vuelven 1s</div>
+        <div class="phase" id="ph_q3"><b>q3</b> Regresar hasta el signo +</div>
+        <div class="phase" id="ph_q4"><b>q4</b> Sumar 1 al de la izquierda (los 1s finales se vuelven 0, el primer 0 se vuelve 1)</div>
+        <div class="phase" id="ph_q5"><b>q5</b> Borrar el + y los ceros sobrantes. ALTO ✓</div>
+      </div>
+      <table id="rules">
+        <tr><th>ESTADO</th><th>LEE</th><th>ESCRIBE</th><th>MUEVE</th><th>NUEVO</th>
+            <th>ESTADO</th><th>LEE</th><th>ESCRIBE</th><th>MUEVE</th><th>NUEVO</th></tr>
+        <tr><td id="c_q0,0" colspan="5"><b class="q">q0</b> · <b class="s">0</b> → <b class="s">0</b>, <b class="m">→</b>, <b class="q">q0</b></td>
+            <td id="c_q2,0" colspan="5"><b class="q">q2</b> · <b class="s">0</b> → <b class="s">1</b>, <b class="m">→</b>, <b class="q">q2</b></td></tr>
+        <tr><td id="c_q0,1" colspan="5"><b class="q">q0</b> · <b class="s">1</b> → <b class="s">1</b>, <b class="m">→</b>, <b class="q">q0</b></td>
+            <td id="c_q2, " colspan="5"><b class="q">q2</b> · ␣ → ␣, <b class="m">←</b>, <b class="q">q3</b></td></tr>
+        <tr><td id="c_q0,+" colspan="5"><b class="q">q0</b> · <b class="p">+</b> → <b class="p">+</b>, <b class="m">→</b>, <b class="q">q0</b></td>
+            <td id="c_q3,0" colspan="5"><b class="q">q3</b> · <b class="s">0</b>/<b class="s">1</b> → igual, <b class="m">←</b>, <b class="q">q3</b></td></tr>
+        <tr><td id="c_q0, " colspan="5"><b class="q">q0</b> · ␣ → ␣, <b class="m">←</b>, <b class="q">q1</b></td>
+            <td id="c_q3,+" colspan="5"><b class="q">q3</b> · <b class="p">+</b> → <b class="p">+</b>, <b class="m">←</b>, <b class="q">q4</b></td></tr>
+        <tr><td id="c_q1,0" colspan="5"><b class="q">q1</b> · <b class="s">0</b> → <b class="s">0</b>, <b class="m">←</b>, <b class="q">q1</b></td>
+            <td id="c_q4,1" colspan="5"><b class="q">q4</b> · <b class="s">1</b> → <b class="s">0</b>, <b class="m">←</b>, <b class="q">q4</b></td></tr>
+        <tr><td id="c_q1,1" colspan="5"><b class="q">q1</b> · <b class="s">1</b> → <b class="s">0</b>, <b class="m">→</b>, <b class="q">q2</b></td>
+            <td id="c_q4,0" colspan="5"><b class="q">q4</b> · <b class="s">0</b>/␣ → <b class="s">1</b>, <b class="m">→</b>, <b class="q">q0</b></td></tr>
+        <tr><td id="c_q1,+" colspan="5"><b class="q">q1</b> · <b class="p">+</b> → ␣, <b class="m">→</b>, <b class="q">q5</b></td>
+            <td id="c_q5,0" colspan="5"><b class="q">q5</b> · <b class="s">0</b> → ␣, <b class="m">→</b>, <b class="q">q5</b> · ␣ → <b style="color:var(--green)">ALTO ✓</b></td></tr>
+      </table>
+    </div>
+    <div class="panel reto">
+      <h3 class="sec">🏆 MODO RETO BINARIO</h3>
+      <p>Antes de pulsar Auto: ¿cuál será el resultado <b>en binario</b>? ¿Y en decimal?</p>
+      <div class="row">
+        <label>Binario</label><input type="text" id="predBin" placeholder="1000" size="8" style="width:110px">
+        <label>Decimal</label><input type="number" id="predDec" min="0" max="30" style="width:72px">
+      </div>
+      <div class="row" style="margin-top:10px"><button class="gold" id="btnCheck">Comprobar</button></div>
+      <div class="msg" id="msg"></div>
+      <p style="margin-top:12px">Pista: para convertir, cada posición vale el doble que la anterior:<br>
+      <b style="color:var(--cyan)">1000₂ = 8 · 101₂ = 4+1 = 5 · 111₂ = 4+2+1 = 7</b></p>
+      <p style="margin-top:8px">Reto extra: ¿con qué pareja de números tarda MÁS pasos? Experimenta. 🤔</p>
+    </div>
+  </div>
+
+  <footer>Máquina de Turing de suma binaria · 6 estados + ALTO · verificada para todas las sumas de 0+0 a 15+15</footer>
+</div>
+
+<script>
+(function(){
+  const cv = document.getElementById('sky'), cx = cv.getContext('2d');
+  function drawSky(){
+    cv.width = innerWidth; cv.height = innerHeight;
+    for (let i=0;i<150;i++){
+      const x=Math.random()*cv.width, y=Math.random()*cv.height, r=Math.random()*1.5+0.3;
+      cx.globalAlpha = Math.random()*0.65+0.15;
+      cx.fillStyle = ['#FFFFFF','#B8FFD9','#BFE3FF'][i%3];
+      cx.beginPath(); cx.arc(x,y,r,0,7); cx.fill();
+    }
+    cx.globalAlpha = 1;
+  }
+  drawSky(); addEventListener('resize', drawSky);
+
+  const B = ' ';
+  const RULES = {
+    'q0,0':['0',1,'q0'], 'q0,1':['1',1,'q0'], 'q0,+':['+',1,'q0'], 'q0, ':[' ',-1,'q1'],
+    'q1,0':['0',-1,'q1'], 'q1,1':['0',1,'q2'], 'q1,+':[' ',1,'q5'],
+    'q2,0':['1',1,'q2'], 'q2, ':[' ',-1,'q3'],
+    'q3,0':['0',-1,'q3'], 'q3,1':['1',-1,'q3'], 'q3,+':['+',-1,'q4'],
+    'q4,1':['0',-1,'q4'], 'q4,0':['1',1,'q0'], 'q4, ':['1',1,'q0'],
+    'q5,0':[' ',1,'q5'], 'q5, ':[' ',0,'ALTO'],
+  };
+  const CELLMAP = { 'q3,1':'c_q3,0', 'q4, ':'c_q4,0' }; // rules shared in one table cell
+
+  let tape=[], head=0, state='q0', steps=0, halted=false, timer=null, loaded=false;
+  const $ = id => document.getElementById(id);
+
+  function updBins(){
+    $('binA').textContent = `${clampVal('numA')} = ${clampVal('numA').toString(2)}₂`;
+    $('binB').textContent = `${clampVal('numB')} = ${clampVal('numB').toString(2)}₂`;
+  }
+  function clampVal(id){
+    const inp=$(id); let v=parseInt(inp.value); if(isNaN(v)) v=0;
+    v=Math.max(0,Math.min(15,v)); inp.value=v; return v;
+  }
+  function load(){
+    stop(); updBins();
+    const a=clampVal('numA'), b=clampVal('numB');
+    tape=(a.toString(2)+'+'+b.toString(2)).split('');
+    tape.unshift(B); tape.push(B);
+    head=1; state='q0'; steps=0; halted=false; loaded=true;
+    $('msg').textContent=''; $('msg').className='msg';
+    setStatus(`Cinta cargada: <b>${a.toString(2)}₂ + ${b.toString(2)}₂</b>  (${a} + ${b}). Predice el resultado y pulsa Auto.`);
+    render(); highlight(null);
+  }
+  function step(){
+    if(!loaded||halted) return;
+    const sym=tape[head]||B, key=state+','+sym, r=RULES[key];
+    highlight(r?key:null);
+    if(!r){ halted=true; setStatus('Sin regla. ALTO.'); render(); return; }
+    tape[head]=r[0]; head+=r[1]; state=r[2]; steps++;
+    while(head>=tape.length) tape.push(B);
+    if(head<0){ tape.unshift(B); head=0; }
+    if(state==='ALTO'){
+      halted=true; stop();
+      const bin=tape.join('').trim()||'0', dec=parseInt(bin,2);
+      setStatus(`🎉 <b>ALTO</b> en ${steps} pasos. La cinta dice <b>${bin}₂</b> = <b>${dec}</b>.`);
+    }
+    render();
+  }
+  function run(){
+    if(!loaded||halted) return;
+    if(timer){ stop(); return; }
+    $('btnRun').textContent='Pausa ⏸';
+    const tick=()=>{ step(); if(!halted&&timer!==null) timer=setTimeout(tick, parseInt($('speed').value)); else stop(); };
+    timer=setTimeout(tick, parseInt($('speed').value));
+  }
+  function stop(){ if(timer){ clearTimeout(timer); } timer=null; $('btnRun').textContent='Auto ▶▶'; }
+  function decode(){
+    const s=tape.join(''), i=s.indexOf('+');
+    if(i<0){ const t=s.trim(); return [t?`${t.trim()||'0'}₂ = ${parseInt(t,2)}`:'–','–']; }
+    const A=s.slice(0,i).trim(), Bb=s.slice(i+1).trim();
+    return [A?`${A}₂ = ${parseInt(A,2)}`:'–', Bb?`${Bb}₂ = ${parseInt(Bb,2)}`:'–'];
+  }
+  function render(){
+    const t=$('tape'); t.innerHTML='';
+    tape.forEach((c,i)=>{
+      const d=document.createElement('div');
+      d.className='cell'+(c==='1'?' d1':'')+(c==='0'?' d0':'')+(c==='+'?' plus':'')+(i===head?' head':'')+(halted&&i===head?' halt':'');
+      if(i===head) d.dataset.state=state;
+      d.textContent=(c===B?'·':c);
+      t.appendChild(d);
+    });
+    $('steps').textContent=steps;
+    $('stateChip').textContent=state;
+    const [va,vb]=decode(); $('valA').textContent=va; $('valB').textContent=vb;
+    document.querySelectorAll('.phase').forEach(p=>p.classList.remove('active'));
+    const ph=$('ph_'+(state==='ALTO'?'q5':state)); if(ph&&loaded) ph.classList.add('active');
+  }
+  function highlight(key){
+    document.querySelectorAll('#rules td').forEach(td=>td.classList.remove('active'));
+    if(!key) return;
+    const id=CELLMAP[key]||('c_'+key);
+    const el=document.getElementById(id); if(el) el.classList.add('active');
+  }
+  function check(){
+    if(!halted){ flash('Primero deja que la máquina llegue a ALTO ▶▶', false); return; }
+    const bin=tape.join('').trim()||'0', dec=parseInt(bin,2);
+    const pb=($('predBin').value||'').trim().replace(/[^01]/g,''), pd=parseInt($('predDec').value);
+    const okB=pb===bin, okD=pd===dec;
+    if(okB&&okD) flash('🚀 ¡PERFECTO! Binario y decimal correctos. Hablas el idioma de las máquinas.', true);
+    else if(okB) flash(`Binario ✓, pero en decimal es ${dec}.`, false);
+    else if(okD) flash(`Decimal ✓, pero en binario se escribe ${bin}.`, false);
+    else flash(`La cinta dice ${bin}₂ = ${dec}. ¡Revisa tu conversión e inténtalo de nuevo!`, false);
+  }
+  function flash(t,w){ const m=$('msg'); m.textContent=t; m.className='msg '+(w?'win':'lose'); }
+  function setStatus(html){ $('status').innerHTML = html; }
+
+  $('numA').oninput=updBins; $('numB').oninput=updBins;
+  $('btnLoad').onclick=load; $('btnStep').onclick=()=>{ stop(); step(); };
+  $('btnRun').onclick=run; $('btnReset').onclick=load; $('btnCheck').onclick=check;
+  load();
+})();
+</script>
+</body>
+</html>
