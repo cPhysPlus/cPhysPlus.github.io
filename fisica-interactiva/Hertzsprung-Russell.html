@@ -31,7 +31,14 @@
         .data-item span:first-child { color: #888; margin-right: 5px; }
         .btn-habitable {background: #00c853; color: black; border: none; padding: 8px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-family: 'Space Mono', monospace;
             text-transform: uppercase; transition: 0.3s; white-space: nowrap;}
-        .btn-habitable:hover { background: #b2ff59; box-shadow: 0 0 15px rgba(0, 200, 83, 0.4);}        
+        .btn-habitable:hover { background: #b2ff59; box-shadow: 0 0 15px rgba(0, 200, 83, 0.4);}
+        .export-box {width: 100%; max-width: 1200px; display: flex; flex-direction: column; align-items: center;
+            gap: 8px; margin-top: 10px; box-sizing: border-box;}
+        .btn-export {background: #4fc3f7; color: #06203a; border: none; padding: 12px 26px; border-radius: 8px;
+            cursor: pointer; font-weight: bold; font-family: 'Space Mono', monospace; font-size: 1rem;
+            box-shadow: 0 0 14px rgba(79, 195, 247, 0.35); transition: background 0.2s, box-shadow 0.2s;}
+        .btn-export:hover {background: #81d4fa; box-shadow: 0 0 20px rgba(79, 195, 247, 0.6);}
+        .export-hint {font-size: 0.78rem; color: #b0bec5; text-align: center; margin: 0;}
         #hr-plot {width: 1100px; height: 550px;border-radius: 15px; box-shadow: 0 0 30px rgba(0,0,0,0.5);}
         .star-viewer-box {display: flex;justify-content: center;align-items: center;height: 220px;background: rgba(0, 0, 0, 0.2);border-radius: 8px;margin: 10px 0;}
         #star-img {max-height: 180px; width: auto; border-radius: 80%;  object-fit: contain;}
@@ -123,6 +130,10 @@
         </div>
     </div>
         <div id="hr-plot"></div>
+        <div class="export-box">
+            <button class="btn-export" id="exportBtn">⬇ Exportar datos (CSV)</button>
+            <p class="export-hint" id="exportHint">Descarga el catálogo completo de estrellas para analizarlo en Python.</p>
+        </div>
     </div>
 	<div class="credits-content">
     <p id="referenceText">Información obtenida de <a href="https://exoplanet.eu/home/" target="_blank">exoplanet.eu</a>,<a href="https://www.stellarcatalog.com/index_es.php" target="_blank">Stellar Catalog</a>, <a href="https://exoplanetarchive.ipac.caltech.edu/index.html" target="_blank">Exoplanet Archive</a>
@@ -144,6 +155,8 @@
         lblTipo: "Espectro:",
         lblClase: "Clase:",
         btnExplore: "Explorar Sistema ➜",
+        btnExport: "⬇ Exportar datos (CSV)",
+        exportHint: "Descarga el catálogo completo de estrellas para analizarlo en Python.",
         noPlanets: "Sin exoplanetas",
         plotX: "log₁₀ Temperatura Efectiva (K)",
         plotY: "log₁₀ Luminosidad (L/L☉)",
@@ -186,6 +199,8 @@
         lblTipo: "Spectrum:",
         lblClase: "Class:",
         btnExplore: "Explore System ➜",
+        btnExport: "⬇ Export data (CSV)",
+        exportHint: "Download the full star catalogue to analyse it in Python.",
         noPlanets: "No exoplanets",
         plotX: "log₁₀ Effective Temperature (K)",
         plotY: "log₁₀ Luminosity (L/L☉)",
@@ -352,7 +367,9 @@
 		    document.getElementById('referenceText').innerHTML = t.referenceText;
 		    document.getElementById('authorText').textContent = t.authorText;
 		    document.getElementById('creditsText').textContent = t.creditsText;
-		    document.getElementById('contactText').textContent = t.contactText;		
+		    document.getElementById('contactText').textContent = t.contactText;
+		    document.getElementById('exportBtn').innerText = t.btnExport;
+		    document.getElementById('exportHint').textContent = t.exportHint;
 		    
 		    //Traducir datos estelares
 		    const currentClass = document.getElementById('val-size').innerText;
@@ -496,5 +513,49 @@
 			}
         });
     </script>
+<script>
+		// ---------- Exportacion del catalogo estelar a CSV ----------
+		function celdaCSV(valor) {
+		    const s = String(valor);
+		    return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+		}
+
+		function exportarDatosCSV() {
+		    const lang = document.getElementById('languageSelector').value;
+		    const nombres = translations[lang].starNames || {};
+		    const clases  = translations[lang].clases || {};
+
+		    const encabezado = ['nombre', 'temperatura', 'luminosidad', 'radio',
+		                        'espectro', 'grupo', 'tiene_planetas'];
+		    const filas = [encabezado.join(',')];
+
+		    Object.keys(estrellas).forEach(grupo => {
+		        estrellas[grupo].forEach(e => {
+		            filas.push([
+		                celdaCSV(nombres[e.nombre] || e.nombre),
+		                e.temp,
+		                e.lum,
+		                e.radio,
+		                celdaCSV(e.tipo),
+		                celdaCSV(grupo),
+		                e.hasPlanets ? 'si' : 'no'
+		            ].join(','));
+		        });
+		    });
+
+		    const contenido = '﻿' + filas.join('\n') + '\n';
+		    const blob = new Blob([contenido], {type: 'text/csv;charset=utf-8;'});
+		    const url  = URL.createObjectURL(blob);
+		    const a    = document.createElement('a');
+		    a.href = url;
+		    a.download = 'datos_estrellas_hr.csv';
+		    document.body.appendChild(a);
+		    a.click();
+		    document.body.removeChild(a);
+		    URL.revokeObjectURL(url);
+		}
+
+		document.getElementById('exportBtn').addEventListener('click', exportarDatosCSV);
+</script>
 </body>
 </html>
